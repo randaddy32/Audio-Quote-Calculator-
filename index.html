@@ -362,6 +362,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 .ticker-empty { font-size: 11px; color: var(--muted); padding: 0 16px; font-style: italic; opacity: 0.5; }
 .ticker-view-all { flex-shrink: 0; background: rgba(224,92,92,0.12); color: var(--red); border: none; border-left: 1px solid rgba(224,92,92,0.2); font-family: var(--font); font-size: 11px; font-weight: 700; padding: 0 14px; height: 100%; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
 .ticker-view-all:hover { background: rgba(224,92,92,0.22); }
+.hp-badge { background: var(--red); color: #fff; border-radius: 10px; font-size: 10px; padding: 1px 6px; margin-left: 5px; font-weight: 700; vertical-align: middle; }
 @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
 /* ── Hot Potato ── */
@@ -474,7 +475,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
       <span class="ticker-empty">Loading market activity...</span>
     </div>
   </div>
-  <button class="ticker-view-all" onclick="openAlerts()"><span class="ticker-view-label">View All</span> →</button>
+  <button class="ticker-view-all" onclick="openAlerts()"><span class="ticker-view-label">View All</span> → <span class="hp-badge" id="hpBadge" style="display:none"></span></button>
 </div>
 
 <div class="tick-popover" id="tickPopover"></div>
@@ -834,6 +835,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <div class="hp-confirm-emoji">🚩</div>
         <div class="hp-confirm-msg">Potato passed.</div>
         <div class="hp-confirm-sub">Your department has a heads up. You stay anonymous — the production doesn't. If 2 more mixers flag the same production within 48 hours, the community gets an alert.</div>
+        <div id="hpReportNum" style="font-size:12px;color:var(--muted);margin-top:10px"></div>
         <br>
         <button class="hp-submit" onclick="closeHP();openAlerts()" style="width:100%;margin-bottom:8px">View Community Alerts →</button>
         <button class="hp-skip" onclick="closeHP()" style="width:100%;margin-top:4px">Close</button>
@@ -2082,29 +2084,35 @@ function maybeTrackQuote(market, dailyRate, days) {
   }, 3000);
 }
 
-const TICKER_FALLBACK = [
-  { market: 'Los Angeles, CA', production: 'Unnamed Production',  count: 4, avg_offered: 1200, avg_rec: 1800 },
-  { market: 'Atlanta, GA',     production: 'Unnamed Production',  count: 3, avg_offered: 700,  avg_rec: 1200 },
-  { market: 'Nashville, TN',   production: 'Unnamed Production',  count: 2, avg_offered: 850,  avg_rec: 1400 },
-  { market: 'New York, NY',    production: 'Unnamed Production',  count: 5, avg_offered: 1400, avg_rec: 2100 },
-  { market: 'Chicago, IL',     production: 'Unnamed Production',  count: 2, avg_offered: 900,  avg_rec: 1400 },
-  { market: 'Miami, FL',       production: 'Unnamed Production',  count: 3, avg_offered: 800,  avg_rec: 1350 },
-];
+
+async function fetchHPCount() {
+  try {
+    const res = await sbFetch('hot_potato?select=id', { headers: { 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' } });
+    const range = res.headers.get('Content-Range');
+    if (!range) return null;
+    const total = parseInt(range.split('/')[1], 10);
+    if (isNaN(total)) return null;
+    const badge = document.getElementById('hpBadge');
+    if (badge) { badge.textContent = total; badge.style.display = total > 0 ? '' : 'none'; }
+    return total;
+  } catch(e) { return null; }
+}
 
 async function loadTicker() {
   try {
     const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const res = await sbFetch(`hot_potato?select=market,offered_rate,recommended_rate,production_name,cameras,lavs,ifbs,boom_op,a2,crew_type&created_at=gte.${cutoff}&limit=200`);
+    const res = await sbFetch(`hot_potato?select=market,offered_rate,recommended_rate,production_name,cameras,lavs,ifbs,boom_op,a2,crew_type,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
     const data = res.ok ? await res.json() : [];
 
     let items;
-    if (data.length >= 2) {
+    if (data.length >= 1) {
       const byKey = {};
       for (const row of data) {
         if (!row.market) continue;
         const key = (row.production_name || '') + '|' + row.market;
-        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, count: 0, offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [] };
+        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, count: 0, offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], latest_at: row.created_at };
         byKey[key].count++;
+        if (row.created_at > byKey[key].latest_at) byKey[key].latest_at = row.created_at;
         if (row.offered_rate)     byKey[key].offered.push(row.offered_rate);
         if (row.recommended_rate) byKey[key].rec.push(row.recommended_rate);
         if (row.cameras)          byKey[key].cameras.push(row.cameras);
@@ -2115,11 +2123,12 @@ async function loadTicker() {
         if (row.crew_type)        byKey[key].crew_types.push(row.crew_type);
       }
       items = Object.values(byKey)
-        .sort((a, b) => b.count - a.count)
+        .sort((a, b) => b.latest_at > a.latest_at ? 1 : -1)
         .map(d => ({
           market:      d.market,
           production:  d.production,
           count:       d.count,
+          latest_at:   d.latest_at,
           avg_offered: d.offered.length ? Math.round(d.offered.reduce((a, b) => a + b, 0) / d.offered.length) : null,
           avg_rec:     d.rec.length     ? Math.round(d.rec.reduce((a, b) => a + b, 0)     / d.rec.length)     : null,
           avg_cameras: d.cameras.length ? Math.round(d.cameras.reduce((a, b) => a + b, 0) / d.cameras.length) : null,
@@ -2130,12 +2139,19 @@ async function loadTicker() {
           crew_type:   d.crew_types.length ? (d.crew_types.filter(t => t === 'oot').length > d.crew_types.length / 2 ? 'oot' : 'local') : null,
         }));
     } else {
-      items = TICKER_FALLBACK;
+      const inner = document.getElementById('tickerInner');
+      if (inner) {
+        inner.style.animation = 'none';
+        inner.innerHTML = `<span style="padding: 0 20px; color: var(--muted); font-size: 11px;">No reports in the last 7 days — be the first to flag a lowball offer in your market.</span>`;
+      }
+      _tickerItems = [];
+      return;
     }
 
     _tickerItems = items;
 
-    const build = items.map((q, i) => {
+    const tickerItems = items.slice(0, 10);
+    const build = tickerItems.map((q, i) => {
       const prod    = q.production ? ` &nbsp;·&nbsp; <strong>${q.production}</strong>` : '';
       const gap     = q.avg_offered ? ` &nbsp;·&nbsp; quoted <strong>$${q.avg_offered.toLocaleString()}</strong> — went quiet` : ' &nbsp;·&nbsp; went quiet';
       const crewStr = q.crew_type === 'oot' ? ' &nbsp;·&nbsp; ✈️ OOT' : q.crew_type === 'local' ? ' &nbsp;·&nbsp; 🏠 local' : '';
@@ -2244,6 +2260,10 @@ async function submitHP() {
   } catch(e) {}
   document.getElementById('hpForm').style.display = 'none';
   document.getElementById('hpConfirm').style.display = '';
+  await new Promise(r => setTimeout(r, 600));
+  const total = await fetchHPCount();
+  const numEl = document.getElementById('hpReportNum');
+  if (numEl && total) numEl.textContent = `You're report #${total.toLocaleString()} to the community.`;
   await loadTicker();
 }
 
@@ -2260,6 +2280,7 @@ populateCitySelects();
 loadRates();
 loadProfile();
 fetchCounter();
+fetchHPCount();
 loadTicker();
 $('shootDate').value = new Date().toISOString().split('T')[0];
 const _exp = new Date(); _exp.setDate(_exp.getDate() + 30);
