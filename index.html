@@ -257,7 +257,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
   .rate-row-extra { grid-template-columns: 1fr 44px 72px; }
   .rates-col-heads { grid-template-columns: 1fr 44px 72px; }
   .custom-item-row { grid-template-columns: 1fr 44px 64px 20px; }
-  .hdr-counter { display: block; font-size: 10px; color: var(--muted); margin: 0; opacity: 1; }
+  .hdr-counter { display: none; }
   .btn-market span, .btn-potato span { display: none; }
   .btn-market { font-size: 18px; padding: 6px 10px; }
   .btn-potato { font-size: 18px; padding: 6px 10px; }
@@ -437,8 +437,8 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
   <div>
     <div class="hdr-logo" onclick="location.href=location.pathname" style="cursor:pointer" title="Refresh"><span class="logo-emoji">🎙</span><span class="logo-name">Location <br>Audio</span></div>
     <div class="hdr-sub">Quote &amp; Gear Calculator. Know your worth. Hold the line.</div>
-    <div class="hdr-counter" id="hdrCounter"></div>
   </div>
+  <div class="hdr-counter" id="hdrCounter"></div>
   <div class="hdr-right">
     <button class="btn btn-market" onclick="openMarket()">📊 <span>Market Rates</span></button>
     <button class="btn btn-potato" onclick="openHP()">🚩 <span>Report</span></button>
