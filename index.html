@@ -1821,8 +1821,8 @@ function generatePDFBlob() {
 
   doc.setDrawColor('#dddddd'); doc.setLineWidth(0.5); doc.line(margin, y, right, y); y += 11;
   ss(7.5, true, '#888888'); doc.text('ABOUT THIS RATE', margin, y); y += 11;
-  const whyPart1 = 'Location audio is a specialized craft requiring significant equipment investment, ongoing maintenance, and years of technical training. The kit rental covers professional-grade recording equipment — multi-channel recorders, wireless microphone systems, booms, IFBs, and accessories — owned, maintained, and insured by the recordist. Day rates reflect not only production days but prep time, equipment transport, and the expertise to capture broadcast-quality audio in any environment.';
-  const whyBold  = 'Poor audio cannot be fixed in post.';
+  const whyPart1 = 'Location audio is a specialized craft requiring significant equipment investment, ongoing maintenance, and years of technical training. The kit rental covers professional grade recording equipment: multichannel recorders, wireless microphone systems, booms, IFBs, and accessories owned, maintained, and insured by the recordist. Day rates reflect not only production days but prep time, equipment transport, and the expertise to capture broadcast quality audio in any environment.';
+  const whyBold  = 'Poor audio can only be fixed so much.';
   const whyPart2 = 'Professional sound is an investment in your project\'s efficiency, quality, and credibility.';
   ss(8.5, false, '#555555');
   const p1Lines = doc.splitTextToSize(whyPart1, col);
@@ -1834,7 +1834,7 @@ function generatePDFBlob() {
 
   doc.setDrawColor('#dddddd'); doc.setLineWidth(0.5); doc.line(margin, y, right, y); y += 11;
   ss(7.5, true, '#888888'); doc.text('TERMS', margin, y); y += 11;
-  const terms = 'A fully executed Deal Memo/Service agreement must be in effect prior to the first day of filming. Jobs under 1 week: Net 30. Jobs over 1 week: billed weekly. 5% late fee after 30 days. Cancellation: 100% due within 1 calendar day of start; 50% within 2 calendar days. OT: Hours 11–12 at 1.5×; hours 12+ at 2×. All rates are per 10-hour day. Kit rental is non-negotiable. Production/Client responsible for any lost or damaged equipment. 100% of replacement or repair cost.';
+  const terms = 'A fully executed Deal Memo and Service agreement must be in effect prior to the first day of filming. Jobs under 1 week: Net 30. Jobs over 1 week: billed weekly. 5% late fee after 30 days. Cancellation: 100% due within 1 calendar day of start; 50% within 2 calendar days. OT: Hours 11 to 12 at 1.5x; hours 12 and beyond at 2x. All rates are per 10 hour day. Kit rental is non negotiable. Production and Client are responsible for any lost or damaged equipment. 100% of replacement or repair cost.';
   ss(8.5, false, '#555555');
   const termLines = doc.splitTextToSize(terms, col);
   doc.text(termLines, margin, y);
