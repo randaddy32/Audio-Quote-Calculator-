@@ -250,6 +250,14 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 /* ── Responsive ── */
 @media (max-width: 860px) {
   body { font-size: 17px; }
+  .app { overflow-x: hidden; }
+  .form-panel, .quote-panel, .section-body { overflow-x: hidden; }
+  .pkg-banner-hint { white-space: normal; word-break: break-word; }
+  .rate-row       { grid-template-columns: 1fr 72px; }
+  .rate-row-extra { grid-template-columns: 1fr 44px 72px; }
+  .rates-col-heads { grid-template-columns: 1fr 44px 72px; }
+  .custom-item-row { grid-template-columns: 1fr 44px 64px 20px; }
+  .hdr-counter { display: none; }
   .app {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto auto;
