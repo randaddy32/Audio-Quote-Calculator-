@@ -456,7 +456,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 <header>
   <div>
     <div class="hdr-logo" onclick="location.href=location.pathname" style="cursor:pointer" title="Refresh"><span class="logo-emoji">🎙</span><span class="logo-name">Location <br>Audio</span></div>
-    <div class="hdr-sub">Quote &amp; Gear Calculator. Know your worth. Hold the line.</div>
+    <div class="hdr-sub">Quote &amp; Gear Calculator. Know your worth. Hold the line. <span style="color:var(--border)">·</span> <span style="color:var(--muted)">Built by <a href="https://sounddepo.github.io" target="_blank" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border)">SoundDepo</a></span></div>
     <div class="hdr-counter" id="hdrCounter"></div>
   </div>
   <div class="hdr-right">
@@ -515,6 +515,10 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
           <label>Email</label>
           <input type="email" id="yourEmail" placeholder="you@email.com" autocomplete="email" oninput="saveProfile();recalc()">
         </div>
+      </div>
+      <div class="field">
+        <label>Website <span style="font-size:10px;color:var(--muted)">(optional, shows on PDF)</span></label>
+        <input type="text" id="yourWebsite" placeholder="e.g. www.ellissound.com" autocomplete="url" oninput="saveProfile();recalc()">
       </div>
       <div class="field">
         <label>Your Market / City</label>
@@ -1209,7 +1213,7 @@ function updateDayRateTotal() {
   $('dayRateTotal').textContent = fmt(l + k);
 }
 
-const PROFILE_KEYS = ['yourName','yourCompany','yourPhone','yourEmail','yourCity','yourCityCustom','yourStreet','yourUnit','yourZip'];
+const PROFILE_KEYS = ['yourName','yourCompany','yourPhone','yourEmail','yourWebsite','yourCity','yourCityCustom','yourStreet','yourUnit','yourZip'];
 function saveProfile() {
   const obj = {}; PROFILE_KEYS.forEach(k => obj[k] = $(k).value);
   localStorage.setItem('aq_profile', JSON.stringify(obj));
@@ -1235,6 +1239,7 @@ function getVals() {
     yourCompany: $('yourCompany').value.trim(),
     yourPhone:   $('yourPhone').value.trim(),
     yourEmail:   $('yourEmail').value.trim(),
+    yourWebsite: $('yourWebsite').value.trim(),
     yourCity:    $('yourCity').value,
     yourCityCustom: $('yourCityCustom').value.trim(),
     yourStreet:  $('yourStreet').value.trim(),
@@ -1341,6 +1346,7 @@ function renderQuote(v, calc) {
       ${v.yourCompany ? `<div class="q-recordist-name">${esc(v.yourCompany)}</div>` : ''}
       ${v.yourName ? `<div class="q-recordist-co">${esc(v.yourName)}</div>` : ''}
       <div class="q-recordist-contact">${[v.yourPhone, v.yourEmail, market ? market.name : ''].filter(Boolean).join('  ·  ')}</div>
+      ${v.yourWebsite ? `<div class="q-recordist-contact">${esc(v.yourWebsite)}</div>` : ''}
       ${v.yourEIN ? `<div class="q-recordist-contact">EIN: ${esc(v.yourEIN)}</div>` : ''}
     </div>`;
   }
@@ -1699,6 +1705,8 @@ function generatePDFBlob() {
   const W = 612, margin = 48, right = W - margin, col = right - margin;
   let y = 52;
 
+  const quoteNum = 'Q-' + (v.shootDate || new Date().toISOString().split('T')[0]).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+
   const ss = (size, bold, hex) => {
     doc.setFontSize(size);
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
@@ -1706,7 +1714,7 @@ function generatePDFBlob() {
   };
 
   ss(8, true, '#888888');
-  doc.text('LOCATION AUDIO SERVICES. QUOTE', margin, y);
+  doc.text('LOCATION AUDIO SERVICES  ·  QUOTE ' + quoteNum, margin, y);
   if (expiryStrP) { ss(8, false, '#aaaaaa'); doc.text('Valid until ' + expiryStrP, right, y, { align: 'right' }); }
   y += 6;
   doc.setDrawColor('#111111'); doc.setLineWidth(1.5);
@@ -1726,6 +1734,7 @@ function generatePDFBlob() {
   { const mkt = MARKETS.find(m => m.id === v.yourCity); const cityName = mkt ? mkt.name : (v.yourCity === 'other' ? v.yourCityCustom : ''); const cityLine = cityName + (v.yourZip ? (cityName ? ', ' : '') + v.yourZip : ''); if (cityLine) { doc.text(cityLine, margin, lY); lY += 13; } }
   if (v.yourPhone)   { doc.text(v.yourPhone,   margin, lY); lY += 13; }
   if (v.yourEmail)   { doc.text(v.yourEmail,   margin, lY); lY += 13; }
+  if (v.yourWebsite) { doc.text(v.yourWebsite, margin, lY); lY += 13; }
   if (v.yourEIN)     { doc.text('EIN: ' + v.yourEIN, margin, lY); lY += 13; }
 
   if (v.clientName)    { ss(13, true,  '#111111'); doc.text(v.clientName,    mid, rY); rY += 15; }
@@ -1772,7 +1781,10 @@ function generatePDFBlob() {
     ss(9, false, '#666666');
     doc.text('Day Rate (Labor + Kit)', margin, y);
     doc.text(f(dayRate) + '/day', right, y, { align: 'right' });
-    y += 16;
+    y += 13;
+    ss(7, false, '#aaaaaa');
+    doc.text('Rates sourced from Sound Mixers Unite and location audio professional communities.', margin, y);
+    y += 13;
   }
   for (const ln of extras) {
     doc.setDrawColor('#dddddd'); doc.line(margin, y, right, y); y += 10;
@@ -1780,11 +1792,18 @@ function generatePDFBlob() {
   }
   y += 6;
 
-  ss(7.5, true, '#888888'); doc.text('GEAR INCLUDED', margin, y); y += 12;
-  const gearText = gear.map(g => g.label).join('  •  ');
-  ss(10, false, '#333333');
-  const gearLines = doc.splitTextToSize(gearText, col);
-  doc.text(gearLines, margin, y); y += gearLines.length * 13 + 30;
+  ss(7.5, true, '#888888'); doc.text('GEAR INCLUDED', margin, y); y += 13;
+  ss(9.5, false, '#333333');
+  const colW = (col) / 2;
+  let gL = y, gR = y;
+  gear.forEach((g, i) => {
+    const xPos = i % 2 === 0 ? margin : margin + colW + 12;
+    const curY  = i % 2 === 0 ? gL : gR;
+    doc.setTextColor('#888888'); doc.text('·', xPos, curY);
+    doc.setTextColor('#333333'); doc.text(g.label, xPos + 9, curY);
+    if (i % 2 === 0) gL += 13; else gR += 13;
+  });
+  y = Math.max(gL, gR) + 18;
 
   doc.setDrawColor('#111111'); doc.setLineWidth(1.5); doc.line(margin, y, right, y); y += 30;
   ss(13, true, '#111111'); doc.text('Total', margin, y);
@@ -1801,11 +1820,25 @@ function generatePDFBlob() {
   }
 
   doc.setDrawColor('#dddddd'); doc.setLineWidth(0.5); doc.line(margin, y, right, y); y += 11;
+  ss(7.5, true, '#888888'); doc.text('ABOUT THIS RATE', margin, y); y += 11;
+  const whyPart1 = 'Location audio is a specialized craft requiring significant equipment investment, ongoing maintenance, and years of technical training. The kit rental covers professional-grade recording equipment — multi-channel recorders, wireless microphone systems, booms, IFBs, and accessories — owned, maintained, and insured by the recordist. Day rates reflect not only production days but prep time, equipment transport, and the expertise to capture broadcast-quality audio in any environment.';
+  const whyBold  = 'Poor audio cannot be fixed in post.';
+  const whyPart2 = 'Professional sound is an investment in your project\'s efficiency, quality, and credibility.';
+  ss(8.5, false, '#555555');
+  const p1Lines = doc.splitTextToSize(whyPart1, col);
+  doc.text(p1Lines, margin, y); y += p1Lines.length * 11 + 5;
+  ss(8.5, true, '#222222');
+  doc.text(whyBold, margin, y); y += 13;
+  ss(8.5, false, '#555555');
+  doc.text(whyPart2, margin, y); y += 22;
+
+  doc.setDrawColor('#dddddd'); doc.setLineWidth(0.5); doc.line(margin, y, right, y); y += 11;
   ss(7.5, true, '#888888'); doc.text('TERMS', margin, y); y += 11;
   const terms = 'A fully executed Deal Memo/Service agreement must be in effect prior to the first day of filming. Jobs under 1 week: Net 30. Jobs over 1 week: billed weekly. 5% late fee after 30 days. Cancellation: 100% due within 1 calendar day of start; 50% within 2 calendar days. OT: Hours 11–12 at 1.5×; hours 12+ at 2×. All rates are per 10-hour day. Kit rental is non-negotiable. Production/Client responsible for any lost or damaged equipment. 100% of replacement or repair cost.';
   ss(8.5, false, '#555555');
   const termLines = doc.splitTextToSize(terms, col);
   doc.text(termLines, margin, y);
+
 
   return doc.output('blob');
 }
