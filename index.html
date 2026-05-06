@@ -26,7 +26,7 @@
 body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; min-height: 100vh; }
 
 /* ── Layout ── */
-.app { display: grid; grid-template-columns: 430px 1fr; grid-template-rows: auto; grid-template-areas: "hdr hdr" "form quote" "foot foot"; min-height: 100vh; }
+.app { display: grid; grid-template-columns: 430px 1fr; grid-template-rows: auto auto 1fr auto; grid-template-areas: "hdr hdr" "ticker ticker" "form quote" "foot foot"; min-height: 100vh; }
 
 /* ── Header ── */
 header { grid-area: hdr; position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; gap: 12px; }
@@ -251,10 +251,10 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 @media (max-width: 860px) {
   .app {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto;
+    grid-template-rows: auto auto auto auto auto;
     height: auto;
     min-height: 100svh;
-    grid-template-areas: "hdr" "tag" "form" "quote" "foot";
+    grid-template-areas: "hdr" "tag" "ticker" "form" "quote" "foot";
   }
   .hdr-sub { display: none; }
   .mobile-tagline { display: block; grid-area: tag; text-align: center; font-size: 10px; color: var(--muted); background: var(--surface); border-bottom: 1px solid var(--border); padding: 6px 16px; letter-spacing: 0.2px; }
@@ -294,6 +294,85 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
   .quote-body { padding: 14px; }
 }
 
+/* ── Counter ── */
+.hdr-counter { font-size: 10px; color: var(--muted); margin-left: 10px; white-space: nowrap; opacity: 0; transition: opacity 0.4s; }
+.hdr-counter.visible { opacity: 1; }
+
+/* ── Ticker ── */
+.ticker-bar { grid-area: ticker; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; height: 32px; overflow: hidden; position: relative; }
+.ticker-label { font-size: 8px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); background: rgba(61,186,122,0.12); border-right: 1px solid rgba(61,186,122,0.2); padding: 0 10px; height: 100%; display: flex; align-items: center; flex-shrink: 0; }
+.ticker-track { flex: 1; overflow: hidden; position: relative; }
+.ticker-inner { display: flex; align-items: center; gap: 0; white-space: nowrap; animation: tickerScroll 8s linear infinite; }
+.ticker-inner:hover { animation-play-state: paused; }
+.tick-item { font-size: 11px; color: var(--muted); padding: 0 28px; border-right: 1px solid var(--border); flex-shrink: 0; }
+.tick-item strong { color: var(--gold); font-family: var(--mono); }
+.ticker-empty { font-size: 11px; color: var(--muted); padding: 0 16px; font-style: italic; opacity: 0.5; }
+.ticker-view-all { flex-shrink: 0; background: rgba(224,92,92,0.12); color: var(--red); border: none; border-left: 1px solid rgba(224,92,92,0.2); font-family: var(--font); font-size: 11px; font-weight: 700; padding: 0 14px; height: 100%; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+.ticker-view-all:hover { background: rgba(224,92,92,0.22); }
+@keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ── Hot Potato ── */
+.btn-potato { background: rgba(224,92,92,0.1); color: var(--red); border: 1px solid rgba(224,92,92,0.25); }
+.btn-potato:hover { background: rgba(224,92,92,0.2); }
+.hp-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 400; padding: 20px; }
+.hp-overlay.visible { display: flex; }
+.hp-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 420px; padding: 28px; box-shadow: 0 24px 80px rgba(0,0,0,0.7); }
+.hp-emoji { font-size: 40px; text-align: center; margin-bottom: 12px; }
+.hp-title { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+.hp-sub { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; margin-bottom: 20px; }
+.hp-field { margin-bottom: 14px; }
+.hp-field label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); display: block; margin-bottom: 5px; }
+.hp-field input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--gold); font-family: var(--mono); font-size: 18px; padding: 10px 12px; outline: none; width: 100%; transition: border-color 0.15s; }
+.hp-field input:focus { border-color: var(--red); }
+.hp-rec { font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 18px; display: flex; justify-content: space-between; }
+.hp-rec span { font-family: var(--mono); color: var(--green); }
+.hp-actions { display: flex; gap: 8px; }
+.hp-submit { flex: 1; background: var(--red); color: #fff; border: none; border-radius: 6px; padding: 10px; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; }
+.hp-submit:hover { background: #f07070; }
+.hp-skip { background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 10px 16px; font-family: var(--font); font-size: 13px; cursor: pointer; }
+.hp-skip:hover { background: var(--surface2); }
+.hp-confirm { text-align: center; padding: 10px 0 0; }
+.hp-confirm-emoji { font-size: 36px; margin-bottom: 10px; }
+.hp-confirm-msg { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.hp-confirm-sub { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* ── Alerts Panel ── */
+.alerts-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: flex-start; justify-content: flex-end; z-index: 300; }
+.alerts-overlay.visible { display: flex; }
+.alerts-panel { background: var(--surface); border-left: 1px solid var(--border); width: 520px; max-width: 100vw; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+.alerts-panel-hdr { padding: 18px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 1; }
+.alerts-panel-title { font-size: 16px; font-weight: 700; }
+.alerts-panel-sub { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.5; }
+.alerts-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 0; line-height: 1; }
+.alerts-close:hover { color: var(--text); }
+.alerts-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.alert-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.alert-card-hdr { padding: 11px 14px; background: rgba(224,92,92,0.06); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.alert-prod { font-size: 14px; font-weight: 700; color: var(--text); }
+.alert-market { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.alert-badge { font-size: 9px; font-weight: 800; background: rgba(224,92,92,0.15); color: var(--red); border: 1px solid rgba(224,92,92,0.3); border-radius: 4px; padding: 2px 7px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.alert-card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.alert-rate-row { display: flex; justify-content: space-between; font-size: 12px; }
+.alert-rate-label { color: var(--muted); }
+.alert-rate-val { font-family: var(--mono); font-weight: 600; }
+.alert-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.alert-chip { font-size: 10px; background: var(--surface3); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; color: var(--muted); }
+.alerts-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+
+/* ── Ticker Popover ── */
+.tick-popover { position: fixed; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; min-width: 260px; max-width: 320px; box-shadow: 0 16px 48px rgba(0,0,0,0.8); z-index: 600; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
+.tick-popover.visible { opacity: 1; }
+.tp-prod { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.tp-market { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+.tp-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.tp-row:last-child { border-bottom: none; }
+.tp-label { color: var(--muted); }
+.tp-val { font-family: var(--mono); color: var(--gold); font-weight: 600; }
+.tp-val.green { color: var(--green); }
+.tp-val.red { color: var(--red); }
+.tp-gear { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.tp-chip { font-size: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; color: var(--muted); }
+
 /* ── Print ── */
 @media print {
   header .hdr-right, .form-panel, footer, .market-overlay, .shortcuts-overlay, .toast, .quote-actions { display: none !important; }
@@ -325,12 +404,27 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
     <div class="hdr-logo" onclick="location.href=location.pathname" style="cursor:pointer" title="Refresh"><span class="logo-emoji">🎙</span><span class="logo-name">Location <br>Audio</span></div>
     <div class="hdr-sub">Quote &amp; Gear Calculator. Know your worth. Hold the line.</div>
   </div>
+  <div class="hdr-counter" id="hdrCounter"></div>
   <div class="hdr-right">
     <button class="btn btn-market" onclick="openMarket()">📊 Market Rates</button>
+    <button class="btn btn-potato" onclick="openHP()">🚩 Report</button>
     <button class="btn btn-ghost" onclick="resetForm()">↺ <kbd>⌘⌫</kbd></button>
     <button class="btn btn-ghost" onclick="toggleShortcuts()">⌨ <kbd>?</kbd></button>
   </div>
 </header>
+
+<!-- ── Ticker ── -->
+<div class="ticker-bar" id="tickerBar">
+  <div class="ticker-label">🚩 Alerts</div>
+  <div class="ticker-track">
+    <div class="ticker-inner" id="tickerInner">
+      <span class="ticker-empty">Loading market activity...</span>
+    </div>
+  </div>
+  <button class="ticker-view-all" onclick="openAlerts()">View All →</button>
+</div>
+
+<div class="tick-popover" id="tickPopover"></div>
 
 <!-- ── Mobile tagline banner (hidden on desktop) ── -->
 <div class="mobile-tagline">Quote &amp; Gear Calculator. Know your worth. Hold the line.</div>
@@ -577,6 +671,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <button class="btn btn-ghost" onclick="copyQuote()">📋 Copy <kbd>⌘⇧C</kbd></button>
         <button class="btn btn-ghost" onclick="emailQuote()">✉ Email <kbd>⌘E</kbd></button>
         <button class="btn btn-ghost" onclick="openPDF()">🖨 Print / PDF <kbd>⌘P</kbd></button>
+        <button class="btn btn-potato" id="potatoBtn" onclick="openHP()" style="display:none">🚩 No Callback?</button>
       </div>
     </div>
     <div class="quote-body" id="quoteLive">
@@ -600,6 +695,97 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 </footer>
 
 </div><!-- .app -->
+
+<!-- ── Alerts Panel ── -->
+<div class="alerts-overlay" id="alertsOverlay" onclick="if(event.target===this)closeAlerts()">
+  <div class="alerts-panel">
+    <div class="alerts-panel-hdr">
+      <div>
+        <div class="alerts-panel-title">🚩 Production Alerts</div>
+        <div class="alerts-panel-sub">Anonymous flags from the community — last 7 days. Reporter stays anonymous. Production doesn't.</div>
+      </div>
+      <button class="alerts-close" onclick="closeAlerts()">✕</button>
+    </div>
+    <div class="alerts-body" id="alertsBody">
+      <div class="alerts-empty">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Hot Potato Modal ── -->
+<div class="hp-overlay" id="hpOverlay" onclick="if(event.target===this)closeHP()">
+  <div class="hp-modal">
+    <div id="hpForm">
+      <div class="hp-emoji">🚩</div>
+      <div class="hp-title">Pass the Hot Potato</div>
+      <div class="hp-sub">Quoted them and went quiet? If you haven't heard back within the hour — odds are they're still shopping. Flag it. Your name stays out of it. The production doesn't.</div>
+      <div class="hp-field" id="hpCityWrap">
+        <label>Your market / city</label>
+        <select id="hpCity" onchange="hpCityChange()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:14px;padding:8px 10px;outline:none;width:100%;transition:border-color 0.15s">
+          <option value="">— Select your city —</option>
+        </select>
+      </div>
+      <div class="hp-field">
+        <label>Production name</label>
+        <input type="text" id="hpProductionName" placeholder="e.g. Netflix Docuseries, Acme Films...">
+      </div>
+      <div class="hp-field">
+        <label>What did you quote them? (per day)</label>
+        <input type="number" id="hpOfferedRate" placeholder="e.g. 1400" inputmode="decimal">
+      </div>
+      <div class="hp-rec">
+        <span>Market rate for your city</span>
+        <span id="hpRecRate">—</span>
+      </div>
+
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:8px">What were they asking for?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+        <div class="hp-field" style="margin:0">
+          <label>Cameras</label>
+          <input type="number" id="hpCameras" placeholder="0" inputmode="numeric" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--gold);font-family:var(--mono);font-size:15px;padding:8px 10px;outline:none;width:100%;text-align:center">
+        </div>
+        <div class="hp-field" style="margin:0">
+          <label>Lavs / Wireless</label>
+          <input type="number" id="hpLavs" placeholder="0" inputmode="numeric" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--gold);font-family:var(--mono);font-size:15px;padding:8px 10px;outline:none;width:100%;text-align:center">
+        </div>
+        <div class="hp-field" style="margin:0">
+          <label>IFBs</label>
+          <input type="number" id="hpIFBs" placeholder="0" inputmode="numeric" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--gold);font-family:var(--mono);font-size:15px;padding:8px 10px;outline:none;width:100%;text-align:center">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer">
+          <input type="checkbox" id="hpBoomOp" style="accent-color:var(--red);width:15px;height:15px"> Boom Op requested
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer">
+          <input type="checkbox" id="hpA2" style="accent-color:var(--red);width:15px;height:15px"> A2 / Utility requested
+        </label>
+      </div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:8px">Crew situation</div>
+      <div style="display:flex;gap:8px;margin-bottom:18px">
+        <label id="crewLocalBtn" onclick="setCrewType('local')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;transition:all 0.15s">
+          <input type="radio" name="hpCrewType" id="hpCrewLocal" value="local" style="accent-color:var(--red)"> 🏠 Local crew
+        </label>
+        <label id="crewOOTBtn" onclick="setCrewType('oot')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;transition:all 0.15s">
+          <input type="radio" name="hpCrewType" id="hpCrewOOT" value="oot" style="accent-color:var(--red)"> ✈️ Out of town crew
+        </label>
+      </div>
+
+      <div class="hp-actions">
+        <button class="hp-submit" onclick="submitHP()">🚩 Pass It</button>
+      </div>
+    </div>
+    <div id="hpConfirm" style="display:none">
+      <div class="hp-confirm">
+        <div class="hp-confirm-emoji">🚩</div>
+        <div class="hp-confirm-msg">Potato passed.</div>
+        <div class="hp-confirm-sub">Your department has a heads up. You stay anonymous — the production doesn't. If 2 more mixers flag the same production within 48 hours, the community gets an alert.</div>
+        <br>
+        <button class="hp-skip" onclick="closeHP()" style="width:100%;margin-top:4px">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ── Email Compose Modal ── -->
 <div class="compose-overlay" id="composeOverlay" onclick="if(event.target===this)closeCompose()">
@@ -1154,6 +1340,14 @@ function renderQuote(v, calc) {
   </div>`;
 
   $('quoteLive').innerHTML = h;
+
+  const potatoBtn = document.getElementById('potatoBtn');
+  if (potatoBtn) potatoBtn.style.display = (calc.grandTotal > 0 && v.yourCity) ? '' : 'none';
+
+  if (calc.grandTotal > 0 && v.yourCity) {
+    const market = MARKETS.find(m => m.id === v.yourCity);
+    maybeTrackQuote(market ? market.name : v.yourCity, calc.dayRate, parseInt(v.days) || 1);
+  }
 }
 
 function addCustomItem() {
@@ -1673,7 +1867,7 @@ const MOD = /Mac|iPhone|iPod|iPad/.test(navigator.platform) ? 'metaKey' : 'ctrlK
 document.addEventListener('keydown', e => {
   const typing = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
   if (e.key==='?' && !typing)         { e.preventDefault(); toggleShortcuts(); return; }
-  if (e.key==='Escape')               { $('shortcutsOverlay').classList.remove('visible'); closeMarket(); closeCompose(); return; }
+  if (e.key==='Escape')               { $('shortcutsOverlay').classList.remove('visible'); closeMarket(); closeCompose(); closeAlerts(); return; }
   if (!e[MOD]) return;
   if (e.key==='Enter')                { e.preventDefault(); recalcFocus(); return; }
   if (e.key==='C' && e.shiftKey)      { e.preventDefault(); copyQuote(); return; }
@@ -1691,6 +1885,309 @@ function fmtPhone(el) {
   else                   el.value = d;
 }
 
+// ── Alerts Panel ──
+function openAlerts() {
+  document.getElementById('alertsOverlay').classList.add('visible');
+  renderAlerts();
+}
+function closeAlerts() {
+  document.getElementById('alertsOverlay').classList.remove('visible');
+}
+
+function renderAlerts() {
+  const body = document.getElementById('alertsBody');
+  if (!_tickerItems.length) {
+    body.innerHTML = '<div class="alerts-empty">No flags reported in the last 7 days.<br>The community is holding the line. 💪</div>';
+    return;
+  }
+
+  body.innerHTML = _tickerItems.map(q => {
+    const chips = [
+      q.avg_cameras ? `📷 ${q.avg_cameras} cam${q.avg_cameras !== 1 ? 's' : ''}` : null,
+      q.avg_lavs    ? `🎙 ${q.avg_lavs} lav${q.avg_lavs !== 1 ? 's' : ''}`        : null,
+      q.avg_ifbs    ? `🎧 ${q.avg_ifbs} IFB${q.avg_ifbs !== 1 ? 's' : ''}`        : null,
+      q.boom_op     ? '🎤 Boom Op'        : null,
+      q.a2          ? '🔧 A2 / Utility'   : null,
+      q.crew_type === 'oot'   ? '✈️ Out of town crew' : null,
+      q.crew_type === 'local' ? '🏠 Local crew'       : null,
+    ].filter(Boolean);
+
+    const rateRows = [
+      q.avg_offered ? `<div class="alert-rate-row"><span class="alert-rate-label">Quoted them</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
+      q.avg_rec     ? `<div class="alert-rate-row"><span class="alert-rate-label">Market rate</span><span class="alert-rate-val" style="color:var(--green)">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
+    ].join('');
+
+    return `
+      <div class="alert-card">
+        <div class="alert-card-hdr">
+          <div>
+            <div class="alert-prod">${q.production || 'Unnamed Production'}</div>
+            <div class="alert-market">${q.market}</div>
+          </div>
+          <div class="alert-badge">🚩 ${q.count}× no callback</div>
+        </div>
+        <div class="alert-card-body">
+          ${rateRows}
+          ${chips.length ? `<div class="alert-chips">${chips.map(c => `<span class="alert-chip">${c}</span>`).join('')}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Ticker Popover ──
+let _tickerItems = [];
+
+function showTickPopover(el, idx) {
+  const q = _tickerItems[idx];
+  if (!q) return;
+
+  const chips = [
+    q.avg_cameras ? `📷 ${q.avg_cameras} cam${q.avg_cameras !== 1 ? 's' : ''}` : null,
+    q.avg_lavs    ? `🎙 ${q.avg_lavs} lav${q.avg_lavs !== 1 ? 's' : ''}`        : null,
+    q.avg_ifbs    ? `🎧 ${q.avg_ifbs} IFB${q.avg_ifbs !== 1 ? 's' : ''}`        : null,
+    q.boom_op     ? '🎤 Boom Op'  : null,
+    q.a2          ? '🔧 A2 / Utility' : null,
+    q.crew_type === 'oot'   ? '✈️ Out of town crew' : null,
+    q.crew_type === 'local' ? '🏠 Local crew'       : null,
+  ].filter(Boolean);
+
+  const gap = q.avg_offered && q.avg_rec
+    ? `<div class="tp-row"><span class="tp-label">Quoted them</span><span class="tp-val red">$${q.avg_offered.toLocaleString()}/day</span></div>
+       <div class="tp-row"><span class="tp-label">Market rate</span><span class="tp-val green">$${q.avg_rec.toLocaleString()}/day</span></div>`
+    : q.avg_offered
+    ? `<div class="tp-row"><span class="tp-label">Quoted them</span><span class="tp-val red">$${q.avg_offered.toLocaleString()}/day</span></div>`
+    : '';
+
+  const pop = document.getElementById('tickPopover');
+  pop.innerHTML = `
+    <div class="tp-prod">🚩 ${q.production || 'Unnamed Production'}</div>
+    <div class="tp-market">${q.market} &nbsp;·&nbsp; ${q.count}× no callback</div>
+    ${gap}
+    ${chips.length ? `<div class="tp-gear">${chips.map(c => `<span class="tp-chip">${c}</span>`).join('')}</div>` : ''}
+  `;
+
+  const rect = el.getBoundingClientRect();
+  const top  = rect.bottom + 8;
+  const left = Math.min(rect.left, window.innerWidth - 340);
+  pop.style.top  = top + 'px';
+  pop.style.left = Math.max(8, left) + 'px';
+  pop.classList.add('visible');
+}
+
+function hideTickPopover() {
+  document.getElementById('tickPopover').classList.remove('visible');
+}
+
+// ── Supabase ──
+const SB_URL = 'https://nrcfmluvovgjoxrylvad.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yY2ZtbHV2b3Znam94cnlsdmFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTMyOTUsImV4cCI6MjA5MzY2OTI5NX0.xneXrxdObIE7SuX1CAwRXxZVkcMzBoft1z0z5zr2UoY';
+
+function sbFetch(path, opts = {}) {
+  return fetch(SB_URL + '/rest/v1/' + path, {
+    ...opts,
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      ...(opts.headers || {})
+    }
+  });
+}
+
+function getSessionId() {
+  let id = localStorage.getItem('aq_session');
+  if (!id) { id = crypto.randomUUID(); localStorage.setItem('aq_session', id); }
+  return id;
+}
+
+async function fetchCounter() {
+  try {
+    const res = await sbFetch('quote_events?select=id', { headers: { 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' } });
+    const range = res.headers.get('Content-Range');
+    if (!range) return;
+    const total = parseInt(range.split('/')[1], 10);
+    if (isNaN(total)) return;
+    const el = document.getElementById('hdrCounter');
+    if (el) { el.textContent = total.toLocaleString() + ' quotes generated'; el.classList.add('visible'); }
+  } catch(e) {}
+}
+
+let _trackTimer = null;
+function maybeTrackQuote(market, dailyRate, days) {
+  if (sessionStorage.getItem('aq_tracked')) return;
+  clearTimeout(_trackTimer);
+  _trackTimer = setTimeout(async () => {
+    if (!market || !dailyRate || dailyRate < 1) return;
+    try {
+      await sbFetch('quote_events', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ market, daily_rate: Math.round(dailyRate), duration_days: days || 1 }) });
+      sessionStorage.setItem('aq_tracked', '1');
+      fetchCounter();
+      loadTicker();
+    } catch(e) {}
+  }, 3000);
+}
+
+const TICKER_FALLBACK = [
+  { market: 'Los Angeles, CA', production: 'Unnamed Production',  count: 4, avg_offered: 1200, avg_rec: 1800 },
+  { market: 'Atlanta, GA',     production: 'Unnamed Production',  count: 3, avg_offered: 700,  avg_rec: 1200 },
+  { market: 'Nashville, TN',   production: 'Unnamed Production',  count: 2, avg_offered: 850,  avg_rec: 1400 },
+  { market: 'New York, NY',    production: 'Unnamed Production',  count: 5, avg_offered: 1400, avg_rec: 2100 },
+  { market: 'Chicago, IL',     production: 'Unnamed Production',  count: 2, avg_offered: 900,  avg_rec: 1400 },
+  { market: 'Miami, FL',       production: 'Unnamed Production',  count: 3, avg_offered: 800,  avg_rec: 1350 },
+];
+
+async function loadTicker() {
+  try {
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const res = await sbFetch(`hot_potato?select=market,offered_rate,recommended_rate,production_name,cameras,lavs,ifbs,boom_op,a2,crew_type&created_at=gte.${cutoff}&limit=200`);
+    const data = res.ok ? await res.json() : [];
+
+    let items;
+    if (data.length >= 2) {
+      const byKey = {};
+      for (const row of data) {
+        if (!row.market) continue;
+        const key = (row.production_name || '') + '|' + row.market;
+        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, count: 0, offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [] };
+        byKey[key].count++;
+        if (row.offered_rate)     byKey[key].offered.push(row.offered_rate);
+        if (row.recommended_rate) byKey[key].rec.push(row.recommended_rate);
+        if (row.cameras)          byKey[key].cameras.push(row.cameras);
+        if (row.lavs)             byKey[key].lavs.push(row.lavs);
+        if (row.ifbs)             byKey[key].ifbs.push(row.ifbs);
+        if (row.boom_op)          byKey[key].boom_op = true;
+        if (row.a2)               byKey[key].a2 = true;
+        if (row.crew_type)        byKey[key].crew_types.push(row.crew_type);
+      }
+      items = Object.values(byKey)
+        .sort((a, b) => b.count - a.count)
+        .map(d => ({
+          market:      d.market,
+          production:  d.production,
+          count:       d.count,
+          avg_offered: d.offered.length ? Math.round(d.offered.reduce((a, b) => a + b, 0) / d.offered.length) : null,
+          avg_rec:     d.rec.length     ? Math.round(d.rec.reduce((a, b) => a + b, 0)     / d.rec.length)     : null,
+          avg_cameras: d.cameras.length ? Math.round(d.cameras.reduce((a, b) => a + b, 0) / d.cameras.length) : null,
+          avg_lavs:    d.lavs.length    ? Math.round(d.lavs.reduce((a, b) => a + b, 0)    / d.lavs.length)    : null,
+          avg_ifbs:    d.ifbs.length    ? Math.round(d.ifbs.reduce((a, b) => a + b, 0)    / d.ifbs.length)    : null,
+          boom_op:     d.boom_op,
+          a2:          d.a2,
+          crew_type:   d.crew_types.length ? (d.crew_types.filter(t => t === 'oot').length > d.crew_types.length / 2 ? 'oot' : 'local') : null,
+        }));
+    } else {
+      items = TICKER_FALLBACK;
+    }
+
+    _tickerItems = items;
+
+    const build = items.map((q, i) => {
+      const prod    = q.production ? ` &nbsp;·&nbsp; <strong>${q.production}</strong>` : '';
+      const gap     = q.avg_offered ? ` &nbsp;·&nbsp; quoted <strong>$${q.avg_offered.toLocaleString()}</strong> — went quiet` : ' &nbsp;·&nbsp; went quiet';
+      const crewStr = q.crew_type === 'oot' ? ' &nbsp;·&nbsp; ✈️ OOT' : q.crew_type === 'local' ? ' &nbsp;·&nbsp; 🏠 local' : '';
+      return `<span class="tick-item" data-idx="${i}" onmouseenter="showTickPopover(this,${i})" onmouseleave="hideTickPopover()" ontouchstart="showTickPopover(this,${i})">🚩 ${q.market}${prod} &nbsp;·&nbsp; <strong>${q.count}× no callback</strong>${gap}${crewStr}</span>`;
+    }).join('');
+
+    const inner = document.getElementById('tickerInner');
+    if (inner && build) inner.innerHTML = build + build;
+  } catch(e) {}
+}
+
+// ── Hot Potato ──
+let _hpDayRate = 0;
+let _hpMarket  = '';
+
+function openHP() {
+  const v = getVals();
+  const calc = calcLines(v);
+  _hpDayRate = calc.dayRate || 0;
+  const market = MARKETS.find(m => m.id === v.yourCity);
+  _hpMarket = market ? market.name : '';
+
+  const cityWrap = document.getElementById('hpCityWrap');
+  const citySelect = document.getElementById('hpCity');
+
+  if (_hpMarket) {
+    cityWrap.style.display = 'none';
+  } else {
+    cityWrap.style.display = '';
+    if (citySelect.options.length <= 1) {
+      MARKETS.forEach(m => {
+        const o = document.createElement('option');
+        o.value = m.name; o.textContent = m.name;
+        citySelect.appendChild(o);
+      });
+    }
+    citySelect.value = '';
+  }
+
+  document.getElementById('hpRecRate').textContent = _hpDayRate > 0 ? '$' + _hpDayRate.toLocaleString() + '/day' : 'Select city above';
+  document.getElementById('hpOfferedRate').value = '';
+  document.getElementById('hpProductionName').value = '';
+  document.getElementById('hpCameras').value = '';
+  document.getElementById('hpLavs').value = '';
+  document.getElementById('hpIFBs').value = '';
+  document.getElementById('hpBoomOp').checked = false;
+  document.getElementById('hpA2').checked = false;
+  document.getElementById('hpCrewLocal').checked = false;
+  document.getElementById('hpCrewOOT').checked = false;
+  setCrewType(null);
+  document.getElementById('hpForm').style.display = '';
+  document.getElementById('hpConfirm').style.display = 'none';
+  document.getElementById('hpOverlay').classList.add('visible');
+  setTimeout(() => (_hpMarket ? document.getElementById('hpProductionName') : citySelect).focus(), 100);
+}
+
+function setCrewType(type) {
+  document.getElementById('crewLocalBtn').style.borderColor = type === 'local' ? 'var(--red)' : 'var(--border)';
+  document.getElementById('crewLocalBtn').style.color       = type === 'local' ? 'var(--text)' : 'var(--muted)';
+  document.getElementById('crewOOTBtn').style.borderColor   = type === 'oot'   ? 'var(--red)' : 'var(--border)';
+  document.getElementById('crewOOTBtn').style.color         = type === 'oot'   ? 'var(--text)' : 'var(--muted)';
+}
+
+function hpCityChange() {
+  const sel = document.getElementById('hpCity');
+  _hpMarket = sel.value;
+  const market = MARKETS.find(m => m.name === _hpMarket);
+  if (market) {
+    const rec = market.laborStd + market.kitStd;
+    _hpDayRate = rec;
+    document.getElementById('hpRecRate').textContent = '$' + rec.toLocaleString() + '/day';
+  }
+}
+
+function closeHP() {
+  document.getElementById('hpOverlay').classList.remove('visible');
+}
+
+async function submitHP() {
+  const offered = parseInt(document.getElementById('hpOfferedRate').value, 10);
+  const production = document.getElementById('hpProductionName').value.trim();
+  if (!_hpMarket) { document.getElementById('hpCity').focus(); return; }
+  if (!offered || offered < 1) { document.getElementById('hpOfferedRate').focus(); return; }
+  try {
+    await sbFetch('hot_potato', {
+      method: 'POST',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        market:           _hpMarket,
+        offered_rate:     offered,
+        recommended_rate: Math.round(_hpDayRate),
+        session_id:       getSessionId(),
+        production_name:  production || null,
+        cameras:          parseInt(document.getElementById('hpCameras').value) || null,
+        lavs:             parseInt(document.getElementById('hpLavs').value)    || null,
+        ifbs:             parseInt(document.getElementById('hpIFBs').value)    || null,
+        boom_op:          document.getElementById('hpBoomOp').checked,
+        a2:               document.getElementById('hpA2').checked,
+        crew_type:        document.querySelector('input[name="hpCrewType"]:checked')?.value || null,
+      })
+    });
+  } catch(e) {}
+  document.getElementById('hpForm').style.display = 'none';
+  document.getElementById('hpConfirm').style.display = '';
+  loadTicker();
+}
+
 // ── Init ──
 const QTY_IDS = ['qtyRecorder','qtyWireless','qtyTCBox','qtyHop','qtySlate','qtyPlant','qtyBoomOp','qtyUtility','qtyExpendables'];
 const qtyOpts = Array.from({length: 11}, (_, i) => `<option value="${i}">${i}</option>`).join('');
@@ -1703,6 +2200,8 @@ document.querySelectorAll('.rate-input').forEach(el => {
 populateCitySelects();
 loadRates();
 loadProfile();
+fetchCounter();
+loadTicker();
 $('shootDate').value = new Date().toISOString().split('T')[0];
 const _exp = new Date(); _exp.setDate(_exp.getDate() + 30);
 $('quoteExpiry').value = _exp.toISOString().split('T')[0];
