@@ -834,6 +834,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <div class="hp-confirm-msg">Potato passed.</div>
         <div class="hp-confirm-sub">Your department has a heads up. You stay anonymous — the production doesn't. If 2 more mixers flag the same production within 48 hours, the community gets an alert.</div>
         <br>
+        <button class="hp-submit" onclick="closeHP();openAlerts()" style="width:100%;margin-bottom:8px">View Community Alerts →</button>
         <button class="hp-skip" onclick="closeHP()" style="width:100%;margin-top:4px">Close</button>
       </div>
     </div>
@@ -2142,6 +2143,10 @@ async function loadTicker() {
 
     const inner = document.getElementById('tickerInner');
     if (inner && build) inner.innerHTML = build + build;
+
+    if (document.getElementById('alertsOverlay').classList.contains('visible')) {
+      renderAlerts();
+    }
   } catch(e) {}
 }
 
@@ -2238,7 +2243,7 @@ async function submitHP() {
   } catch(e) {}
   document.getElementById('hpForm').style.display = 'none';
   document.getElementById('hpConfirm').style.display = '';
-  loadTicker();
+  await loadTicker();
 }
 
 // ── Init ──
