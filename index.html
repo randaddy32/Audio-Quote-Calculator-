@@ -305,8 +305,13 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
   .compose-intro { font-size: 17px; }
   .custom-name, .custom-amount, #quoteNotes { font-size: 17px !important; }
   footer { display: none; }
-  .market-panel { width: 100vw; height: 100svh; }
-  .alerts-panel { width: 100vw; height: 100svh; }
+  .market-panel { width: 100vw; height: 100svh; overflow-x: hidden; }
+  .market-body { padding: 14px; }
+  .market-panel-hdr { padding: 16px 14px; }
+  .market-card-body { padding: 12px; }
+  .apply-btn-wrap { padding: 0 0 8px; }
+  .apply-btn-wrap .btn { width: 100%; box-sizing: border-box; white-space: normal; text-align: center; justify-content: center; font-size: 14px; padding: 14px 10px; }
+  .alerts-panel { width: 100vw; height: 100svh; overflow-x: hidden; }
   .compose-overlay { padding: 0; align-items: flex-end; }
   .compose-modal { max-height: 92svh; border-radius: 16px 16px 0 0; width: 100%; }
   .hp-modal { padding: 24px 20px; }
