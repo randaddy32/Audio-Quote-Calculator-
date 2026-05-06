@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Location Audio Quote Calculator</title>
 <meta name="description" content="Free quote calculator for location audio freelancers. Know your market rate. Hold the line.">
 <style>
@@ -23,7 +23,7 @@
   --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; min-height: 100vh; overflow-x: hidden; }
 
 /* ── Layout ── */
 .app { display: grid; grid-template-columns: 430px 1fr; grid-template-rows: auto auto 1fr auto; grid-template-areas: "hdr hdr" "ticker ticker" "form quote" "foot foot"; min-height: 100vh; }
@@ -249,6 +249,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 
 /* ── Responsive ── */
 @media (max-width: 860px) {
+  body { font-size: 17px; }
   .app {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto auto;
@@ -257,32 +258,53 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
     grid-template-areas: "hdr" "tag" "ticker" "form" "quote" "foot";
   }
   .hdr-sub { display: none; }
-  .mobile-tagline { display: block; grid-area: tag; text-align: center; font-size: 10px; color: var(--muted); background: var(--surface); border-bottom: 1px solid var(--border); padding: 6px 16px; letter-spacing: 0.2px; }
-  .hdr-logo { font-size: 16px; display: flex; align-items: center; }
+  .mobile-tagline { display: none; }
+  .hdr-logo { font-size: 20px; display: flex; align-items: center; }
   .logo-name { line-height: 1.25; }
   .logo-name br { display: inline; }
-  .hdr-right { gap: 4px; }
-  .btn-market { font-size: 11px; padding: 6px 8px; }
-  .btn-ghost { font-size: 12px; padding: 6px 8px; }
+  .hdr-right { gap: 6px; }
+  .btn-market { font-size: 13px; padding: 8px 12px; }
+  .btn-ghost { font-size: 13px; padding: 8px 10px; }
+  .btn-potato { font-size: 13px; padding: 8px 12px; }
   .btn kbd { display: none; }
   .form-panel {
     border-right: none;
     border-bottom: 1px solid var(--border);
     overflow-y: visible;
-    padding: 12px;
+    padding: 14px;
+    gap: 14px;
   }
-  .quote-panel { padding: 12px; }
-  .field input, .field select, .field textarea { font-size: 16px; min-height: 44px; padding: 10px 12px; }
-  .btn { min-height: 44px; }
-  .rate-input { font-size: 16px; min-height: 40px; padding: 8px 10px; }
-  .compose-input { font-size: 16px; }
-  .compose-intro { font-size: 16px; }
-  .custom-name, .custom-amount, #quoteNotes { font-size: 16px !important; }
+  .section-hdr { font-size: 12px; padding: 11px 14px; }
+  .section-body { padding: 14px; gap: 12px; }
+  .field label { font-size: 13px; }
+  .field input, .field select, .field textarea { font-size: 17px; min-height: 50px; padding: 12px 14px; }
+  .rate-label { font-size: 15px; }
+  .rate-sub { font-size: 12px; }
+  .rate-input { font-size: 18px; min-height: 48px; padding: 10px 12px; }
+  .qty-input { font-size: 17px; min-height: 48px; }
+  .btn { min-height: 50px; font-size: 15px; }
+  .quote-panel { padding: 14px; }
+  .quote-card-title { font-size: 16px; }
+  .q-line-name { font-size: 15px; }
+  .q-line-amt { font-size: 15px; }
+  .q-total { font-size: 19px; }
+  .compose-input { font-size: 17px; }
+  .compose-intro { font-size: 17px; }
+  .custom-name, .custom-amount, #quoteNotes { font-size: 17px !important; }
   footer { display: none; }
   .market-panel { width: 100vw; height: 100svh; }
+  .alerts-panel { width: 100vw; height: 100svh; }
   .compose-overlay { padding: 0; align-items: flex-end; }
   .compose-modal { max-height: 92svh; border-radius: 16px 16px 0 0; width: 100%; }
+  .hp-modal { padding: 24px 20px; }
+  .hp-title { font-size: 18px; }
+  .hp-sub { font-size: 14px; }
+  .hp-field input { font-size: 20px; padding: 12px; }
   .toast { bottom: 20px; }
+  .ticker-bar { height: 38px; }
+  .ticker-label { font-size: 10px; padding: 0 12px; }
+  .tick-item { font-size: 13px; }
+  .ticker-view-all { font-size: 12px; padding: 0 12px; }
 }
 
 @media (max-width: 480px) {
