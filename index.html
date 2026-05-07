@@ -2332,6 +2332,34 @@ async function submitHP() {
   await loadTicker();
 }
 
+// ── Ticker Touch Drag ──
+(function() {
+  const inner = document.getElementById('tickerInner');
+  if (!inner) return;
+  let startX = 0, offsetX = 0, dragging = false;
+
+  inner.addEventListener('touchstart', e => {
+    const matrix = new DOMMatrix(getComputedStyle(inner).transform);
+    offsetX = matrix.m41;
+    startX = e.touches[0].clientX;
+    dragging = true;
+    inner.style.animationPlayState = 'paused';
+    inner.style.transform = `translateX(${offsetX}px)`;
+  }, { passive: true });
+
+  inner.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const dx = e.touches[0].clientX - startX;
+    inner.style.transform = `translateX(${offsetX + dx}px)`;
+  }, { passive: true });
+
+  inner.addEventListener('touchend', () => {
+    dragging = false;
+    inner.style.transform = '';
+    inner.style.animationPlayState = 'running';
+  }, { passive: true });
+})();
+
 // ── Init ──
 const QTY_IDS = ['qtyRecorder','qtyWireless','qtyTCBox','qtyHop','qtySlate','qtyPlant','qtyBoomOp','qtyUtility','qtyExpendables'];
 const qtyOpts = Array.from({length: 11}, (_, i) => `<option value="${i}">${i}</option>`).join('');
