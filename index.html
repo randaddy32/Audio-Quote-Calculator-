@@ -2302,13 +2302,13 @@ function openHP() {
   }
   if (_hpMarket) {
     citySelect.value = _hpMarket;
-    hpCityChange();
   } else {
     citySelect.value = '';
   }
 
   document.getElementById('hpRecRate').textContent = '';
   document.getElementById('hpRecWrap').style.display = _hpDayRate > 0 ? '' : 'none';
+  if (_hpMarket) hpCityChange();
   document.getElementById('hpOfferedRate').value = '';
   document.getElementById('hpProductionName').value = '';
   document.getElementById('hpLocation').value = '';
