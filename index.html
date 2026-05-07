@@ -2066,14 +2066,17 @@ function renderAlerts() {
       q.avg_rec     ? `<div class="alert-rate-row"><span class="alert-rate-label">Market rate</span><span class="alert-rate-val" style="color:var(--green)">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
     ].join('');
 
+    const dateStr = q.shoot_date ? new Date(q.shoot_date + 'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : null;
     return `
       <div class="alert-card">
         <div class="alert-card-hdr">
-          <div>
+          <div style="flex:1;min-width:0">
             <div class="alert-prod">${q.production || 'Unnamed Production'}</div>
-            <div class="alert-market">${q.market}${q.location ? ' &nbsp;·&nbsp; 📍 ' + esc(q.location) : ''}${q.shoot_date ? ' &nbsp;·&nbsp; 📅 ' + new Date(q.shoot_date + 'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : ''}</div>
+            <div class="alert-market">${q.market}</div>
+            ${q.location ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(q.location)}</div>` : ''}
+            ${dateStr    ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${dateStr}</div>` : ''}
           </div>
-          <div class="alert-badge">🚩 ${q.count}× no callback</div>
+          <div class="alert-badge" style="align-self:flex-start">🚩 ${q.count}× no callback</div>
         </div>
         <div class="alert-card-body">
           ${rateRows}
@@ -2110,7 +2113,9 @@ function showTickPopover(el, idx) {
   const pop = document.getElementById('tickPopover');
   pop.innerHTML = `
     <div class="tp-prod">🚩 ${q.production || 'Unnamed Production'}</div>
-    <div class="tp-market">${q.market}${q.location ? ' &nbsp;·&nbsp; 📍 ' + esc(q.location) : ''}${q.shoot_date ? ' &nbsp;·&nbsp; 📅 ' + new Date(q.shoot_date + 'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : ''} &nbsp;·&nbsp; ${q.count}× no callback</div>
+    <div class="tp-market">${q.market} &nbsp;·&nbsp; ${q.count}× no callback</div>
+    ${q.location   ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(q.location)}</div>` : ''}
+    ${q.shoot_date ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${new Date(q.shoot_date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>` : ''}
     ${gap}
     ${chips.length ? `<div class="tp-gear">${chips.map(c => `<span class="tp-chip">${c}</span>`).join('')}</div>` : ''}
   `;
