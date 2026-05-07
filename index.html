@@ -806,6 +806,10 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <input type="text" id="hpProductionName" placeholder="e.g. Netflix Docuseries, Acme Films...">
       </div>
       <div class="hp-field">
+        <label>Shoot location <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label>
+        <input type="text" id="hpLocation" placeholder="e.g. McCormick Place, Downtown LA...">
+      </div>
+      <div class="hp-field">
         <label>What did you quote them? (per day)</label>
         <input type="number" id="hpOfferedRate" placeholder="e.g. 1400" inputmode="decimal">
       </div>
@@ -2063,7 +2067,7 @@ function renderAlerts() {
         <div class="alert-card-hdr">
           <div>
             <div class="alert-prod">${q.production || 'Unnamed Production'}</div>
-            <div class="alert-market">${q.market}</div>
+            <div class="alert-market">${q.market}${q.location ? ' &nbsp;·&nbsp; 📍 ' + esc(q.location) : ''}</div>
           </div>
           <div class="alert-badge">🚩 ${q.count}× no callback</div>
         </div>
@@ -2102,7 +2106,7 @@ function showTickPopover(el, idx) {
   const pop = document.getElementById('tickPopover');
   pop.innerHTML = `
     <div class="tp-prod">🚩 ${q.production || 'Unnamed Production'}</div>
-    <div class="tp-market">${q.market} &nbsp;·&nbsp; ${q.count}× no callback</div>
+    <div class="tp-market">${q.market}${q.location ? ' &nbsp;·&nbsp; 📍 ' + esc(q.location) : ''} &nbsp;·&nbsp; ${q.count}× no callback</div>
     ${gap}
     ${chips.length ? `<div class="tp-gear">${chips.map(c => `<span class="tp-chip">${c}</span>`).join('')}</div>` : ''}
   `;
@@ -2197,7 +2201,7 @@ async function fetchHPCount() {
 async function loadTicker() {
   try {
     const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const res = await sbFetch(`hot_potato?select=market,offered_rate,recommended_rate,production_name,cameras,lavs,ifbs,boom_op,a2,crew_type,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
+    const res = await sbFetch(`hot_potato?select=market,offered_rate,recommended_rate,production_name,location,cameras,lavs,ifbs,boom_op,a2,crew_type,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
     const data = res.ok ? await res.json() : [];
 
     let items;
@@ -2206,7 +2210,7 @@ async function loadTicker() {
       for (const row of data) {
         if (!row.market) continue;
         const key = (row.production_name || '') + '|' + row.market;
-        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, count: 0, offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], latest_at: row.created_at };
+        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, count: 0, offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], latest_at: row.created_at };
         byKey[key].count++;
         if (row.created_at > byKey[key].latest_at) byKey[key].latest_at = row.created_at;
         if (row.offered_rate)     byKey[key].offered.push(row.offered_rate);
@@ -2223,6 +2227,7 @@ async function loadTicker() {
         .map(d => ({
           market:      d.market,
           production:  d.production,
+          location:    d.location,
           count:       d.count,
           latest_at:   d.latest_at,
           avg_offered: d.offered.length ? Math.round(d.offered.reduce((a, b) => a + b, 0) / d.offered.length) : null,
@@ -2248,9 +2253,10 @@ async function loadTicker() {
     const tickerItems = items.slice(0, 10);
     const build = tickerItems.map((q, i) => {
       const prod    = q.production ? ` &nbsp;·&nbsp; <strong>${q.production}</strong>` : '';
+      const loc     = q.location   ? ` &nbsp;·&nbsp; 📍 ${q.location}` : '';
       const gap     = q.avg_offered ? ` &nbsp;·&nbsp; quoted <strong>$${q.avg_offered.toLocaleString()}</strong> — went quiet` : ' &nbsp;·&nbsp; went quiet';
       const crewStr = q.crew_type === 'oot' ? ' &nbsp;·&nbsp; ✈️ OOT' : q.crew_type === 'local' ? ' &nbsp;·&nbsp; 🏠 local' : '';
-      return `<span class="tick-item" data-idx="${i}">🚩 ${q.market}${prod} &nbsp;·&nbsp; <strong>${q.count}× no callback</strong>${gap}${crewStr}</span>`;
+      return `<span class="tick-item" data-idx="${i}">🚩 ${q.market}${prod}${loc} &nbsp;·&nbsp; <strong>${q.count}× no callback</strong>${gap}${crewStr}</span>`;
     }).join('');
 
     const inner = document.getElementById('tickerInner');
@@ -2304,6 +2310,7 @@ function openHP() {
   document.getElementById('hpRecRate').textContent = _hpDayRate > 0 ? '$' + _hpDayRate.toLocaleString() + '/day' : 'Select city above';
   document.getElementById('hpOfferedRate').value = '';
   document.getElementById('hpProductionName').value = '';
+  document.getElementById('hpLocation').value = '';
   ['hpCameras','hpLavs','hpIFBs'].forEach(id => {
     document.getElementById(id).value = '0';
     const d = document.getElementById(id + 'Val'); if (d) d.textContent = '0';
@@ -2368,6 +2375,7 @@ async function submitHP() {
         recommended_rate: Math.round(_hpDayRate),
         session_id:       getSessionId(),
         production_name:  production || null,
+        location:         document.getElementById('hpLocation').value.trim() || null,
         cameras:          parseInt(document.getElementById('hpCameras').value) || null,
         lavs:             parseInt(document.getElementById('hpLavs').value)    || null,
         ifbs:             parseInt(document.getElementById('hpIFBs').value)    || null,
