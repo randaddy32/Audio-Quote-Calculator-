@@ -383,7 +383,10 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 .hp-field label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); display: block; margin-bottom: 5px; }
 .hp-field input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--gold); font-family: var(--mono); font-size: 18px; padding: 10px 12px; outline: none; width: 100%; transition: border-color 0.15s; }
 .hp-field input:focus { border-color: var(--red); }
-.hp-picker { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--gold); font-family: var(--mono); font-size: 15px; padding: 8px 4px; outline: none; width: 100%; text-align: center; cursor: pointer; -webkit-appearance: none; appearance: none; }
+.hp-stepper { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.step-btn { background: none; border: none; color: var(--muted); font-size: 18px; font-weight: 300; padding: 8px 10px; cursor: pointer; line-height: 1; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+.step-btn:active { background: var(--surface2); color: var(--text); }
+.step-val { flex: 1; text-align: center; font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--gold); }
 .hp-rec { font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 18px; display: flex; justify-content: space-between; }
 .hp-rec span { font-family: var(--mono); color: var(--green); }
 .hp-actions { display: flex; gap: 8px; }
@@ -813,21 +816,30 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
         <div class="hp-field" style="margin:0">
           <label>Cameras</label>
-          <select id="hpCameras" class="hp-picker" onchange="this.blur()">
-            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
-          </select>
+          <div class="hp-stepper">
+            <button type="button" class="step-btn" onclick="stepPicker('hpCameras',-1)">−</button>
+            <span class="step-val" id="hpCamerasVal">0</span>
+            <button type="button" class="step-btn" onclick="stepPicker('hpCameras',1)">+</button>
+            <input type="hidden" id="hpCameras" value="0">
+          </div>
         </div>
         <div class="hp-field" style="margin:0">
           <label>Lavs</label>
-          <select id="hpLavs" class="hp-picker" onchange="this.blur()">
-            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20">20</option><option value="25">25</option>
-          </select>
+          <div class="hp-stepper">
+            <button type="button" class="step-btn" onclick="stepPicker('hpLavs',-1)">−</button>
+            <span class="step-val" id="hpLavsVal">0</span>
+            <button type="button" class="step-btn" onclick="stepPicker('hpLavs',1)">+</button>
+            <input type="hidden" id="hpLavs" value="0">
+          </div>
         </div>
         <div class="hp-field" style="margin:0">
           <label>IFBs</label>
-          <select id="hpIFBs" class="hp-picker" onchange="this.blur()">
-            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20">20</option><option value="25">25</option>
-          </select>
+          <div class="hp-stepper">
+            <button type="button" class="step-btn" onclick="stepPicker('hpIFBs',-1)">−</button>
+            <span class="step-val" id="hpIFBsVal">0</span>
+            <button type="button" class="step-btn" onclick="stepPicker('hpIFBs',1)">+</button>
+            <input type="hidden" id="hpIFBs" value="0">
+          </div>
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-bottom:12px">
@@ -2254,6 +2266,16 @@ async function loadTicker() {
 let _hpDayRate = 0;
 let _hpMarket  = '';
 
+function stepPicker(id, delta) {
+  const maxes = { hpCameras: 10, hpLavs: 25, hpIFBs: 25 };
+  const input = document.getElementById(id);
+  const display = document.getElementById(id + 'Val');
+  let val = parseInt(input.value) || 0;
+  val = Math.max(0, Math.min(maxes[id] || 25, val + delta));
+  input.value = val;
+  if (display) display.textContent = val;
+}
+
 function openHP() {
   const v = getVals();
   const calc = calcLines(v);
@@ -2282,9 +2304,10 @@ function openHP() {
   document.getElementById('hpRecRate').textContent = _hpDayRate > 0 ? '$' + _hpDayRate.toLocaleString() + '/day' : 'Select city above';
   document.getElementById('hpOfferedRate').value = '';
   document.getElementById('hpProductionName').value = '';
-  document.getElementById('hpCameras').value = '0';
-  document.getElementById('hpLavs').value = '0';
-  document.getElementById('hpIFBs').value = '0';
+  ['hpCameras','hpLavs','hpIFBs'].forEach(id => {
+    document.getElementById(id).value = '0';
+    const d = document.getElementById(id + 'Val'); if (d) d.textContent = '0';
+  });
   document.getElementById('hpBoomOp').checked = false;
   document.getElementById('hpA2').checked = false;
   document.getElementById('hpCrewLocal').checked = false;
