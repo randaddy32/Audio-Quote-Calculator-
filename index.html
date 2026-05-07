@@ -258,7 +258,8 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
   .rate-row-extra { grid-template-columns: 1fr 44px 72px; }
   .rates-col-heads { grid-template-columns: 1fr 44px 72px; }
   .custom-item-row { grid-template-columns: 1fr 44px 64px 20px; }
-  .hdr-counter { display: inline; font-size: 10px; color: var(--muted); margin: 0; opacity: 1; }
+  .hdr-brand { display: flex; flex-direction: column; gap: 1px; }
+  .hdr-counter { display: block; font-size: 10px; color: var(--muted); margin: 0; opacity: 1; line-height: 1; }
   .btn-shortcuts { display: none; }
   .btn-market span, .btn-potato span { display: none; }
   .btn-market { font-size: 18px; padding: 6px 10px; }
@@ -458,10 +459,10 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 
 <!-- ── Header ── -->
 <header>
-  <div>
+  <div class="hdr-brand">
     <div class="hdr-logo" onclick="location.href=location.pathname" style="cursor:pointer" title="Refresh"><span class="logo-emoji">🎙</span><span class="logo-name">Location <br>Audio</span></div>
     <div class="hdr-sub">Quote &amp; Gear Calculator. Know your worth. Hold the line. <span style="color:var(--border)">·</span> <span style="color:var(--muted)">Built by <a href="https://sounddepo.github.io" target="_blank" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border)">SoundDepo</a></span></div>
-    <div class="hdr-counter" id="hdrCounter"></div>
+    <div class="hdr-counter" id="hdrCounter" style="margin-top:0;line-height:1.2"></div>
   </div>
   <div class="hdr-right">
     <button class="btn btn-market" onclick="openMarket()">📊 <span>Market Rates</span></button>
