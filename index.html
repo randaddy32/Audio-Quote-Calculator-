@@ -1854,7 +1854,7 @@ function generatePDFBlob() {
   doc.setDrawColor('#dddddd'); doc.setLineWidth(0.5); doc.line(margin, y, right, y); y += 11;
   ss(7.5, true, '#888888'); doc.text('ABOUT THIS RATE', margin, y); y += 11;
   const whyPart1 = 'Location audio is a specialized craft requiring significant equipment investment, ongoing maintenance, and years of technical training. The kit rental covers professional grade recording equipment: multichannel recorders, wireless microphone systems, booms, IFBs, and accessories owned, maintained, and insured by the recordist. Day rates reflect not only production days but prep time, equipment transport, and the expertise to capture broadcast quality audio in any environment.';
-  const whyBold  = 'Great audio is invisible. Bad audio is all anyone remembers.';
+  const whyBold  = 'Great audio is invisible. Poor audio is all anyone remembers.';
   const whyPart2 = 'Professional sound is an investment in your project\'s efficiency, quality, and credibility.';
   ss(8.5, false, '#555555');
   const p1Lines = doc.splitTextToSize(whyPart1, col);
