@@ -2035,15 +2035,6 @@ function closeAlerts() {
   document.getElementById('alertsOverlay').classList.remove('visible');
 }
 
-async function deleteMyReport(id) {
-  if (!confirm('Remove your report? This only removes your submission.')) return;
-  try {
-    await sbFetch(`hot_potato?id=eq.${id}&session_id=eq.${getSessionId()}`, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
-  } catch(e) {}
-  await loadTicker();
-  renderAlerts();
-}
-
 function renderAlerts() {
   const body = document.getElementById('alertsBody');
   if (!_tickerItems.length) {
@@ -2085,10 +2076,7 @@ function renderAlerts() {
             ${q.location ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(q.location)}</div>` : ''}
             ${dateStr    ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${dateStr}</div>` : ''}
           </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-            <div class="alert-badge">🚩 ${q.count}× no callback</div>
-            ${q.my_report_id ? `<button onclick="deleteMyReport('${q.my_report_id}')" style="font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;white-space:nowrap">Remove my report</button>` : ''}
-          </div>
+          <div class="alert-badge" style="align-self:flex-start">🚩 ${q.count}× no callback</div>
         </div>
         <div class="alert-card-body">
           ${rateRows}
@@ -2222,7 +2210,7 @@ async function fetchHPCount() {
 async function loadTicker() {
   try {
     const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const res = await sbFetch(`hot_potato?select=id,market,offered_rate,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,session_id,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
+    const res = await sbFetch(`hot_potato?select=market,offered_rate,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
     const data = res.ok ? await res.json() : [];
 
     let items;
@@ -2231,8 +2219,7 @@ async function loadTicker() {
       for (const row of data) {
         if (!row.market) continue;
         const key = (row.production_name || '') + '|' + row.market;
-        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], latest_at: row.created_at, my_report_id: null };
-        if (row.session_id === getSessionId()) byKey[key].my_report_id = row.id;
+        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], latest_at: row.created_at };
         byKey[key].count++;
         if (row.created_at > byKey[key].latest_at) byKey[key].latest_at = row.created_at;
         if (row.offered_rate)     byKey[key].offered.push(row.offered_rate);
@@ -2247,12 +2234,11 @@ async function loadTicker() {
       items = Object.values(byKey)
         .sort((a, b) => b.latest_at > a.latest_at ? 1 : -1)
         .map(d => ({
-          market:        d.market,
-          production:    d.production,
-          location:      d.location,
-          shoot_date:    d.shoot_date,
-          my_report_id:  d.my_report_id,
-          count:         d.count,
+          market:      d.market,
+          production:  d.production,
+          location:    d.location,
+          shoot_date:  d.shoot_date,
+          count:       d.count,
           latest_at:   d.latest_at,
           avg_offered: d.offered.length ? Math.round(d.offered.reduce((a, b) => a + b, 0) / d.offered.length) : null,
           avg_rec:     d.rec.length     ? Math.round(d.rec.reduce((a, b) => a + b, 0)     / d.rec.length)     : null,
