@@ -383,7 +383,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 .hp-field label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); display: block; margin-bottom: 5px; }
 .hp-field input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--gold); font-family: var(--mono); font-size: 18px; padding: 10px 12px; outline: none; width: 100%; transition: border-color 0.15s; }
 .hp-field input:focus { border-color: var(--red); }
-.hp-picker { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--gold); font-family: var(--mono); font-size: 18px; padding: 10px 12px; outline: none; width: 100%; text-align: center; cursor: pointer; -webkit-appearance: none; appearance: none; }
+.hp-picker { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--gold); font-family: var(--mono); font-size: 15px; padding: 8px 4px; outline: none; width: 100%; text-align: center; cursor: pointer; -webkit-appearance: none; appearance: none; }
 .hp-rec { font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 18px; display: flex; justify-content: space-between; }
 .hp-rec span { font-family: var(--mono); color: var(--green); }
 .hp-actions { display: flex; gap: 8px; }
@@ -813,20 +813,20 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
         <div class="hp-field" style="margin:0">
           <label>Cameras</label>
-          <select id="hpCameras" class="hp-picker">
-            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20">20</option>
+          <select id="hpCameras" class="hp-picker" onchange="this.blur()">
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
           </select>
         </div>
         <div class="hp-field" style="margin:0">
           <label>Lavs</label>
-          <select id="hpLavs" class="hp-picker">
-            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20">20</option>
+          <select id="hpLavs" class="hp-picker" onchange="this.blur()">
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20">20</option><option value="25">25</option>
           </select>
         </div>
         <div class="hp-field" style="margin:0">
           <label>IFBs</label>
-          <select id="hpIFBs" class="hp-picker">
-            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20">20</option>
+          <select id="hpIFBs" class="hp-picker" onchange="this.blur()">
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20">20</option><option value="25">25</option>
           </select>
         </div>
       </div>
