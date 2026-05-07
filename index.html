@@ -2373,11 +2373,23 @@ function closeHP() {
   document.getElementById('hpOverlay').classList.remove('visible');
 }
 
+const _badWords = ['dick','cock','pussy','cunt','penis','vagina','fuck','shit','ass','bitch','bastard','whore','slut','fag','nigger','nigga','retard','twat','wanker','prick'];
+function containsBadWord(str) {
+  if (!str) return false;
+  const clean = str.toLowerCase().replace(/[^a-z]/g, '');
+  return _badWords.some(w => clean.includes(w));
+}
+
 async function submitHP() {
   const offered = parseInt(document.getElementById('hpOfferedRate').value, 10);
   const production = document.getElementById('hpProductionName').value.trim();
+  const location  = document.getElementById('hpLocation').value.trim();
   if (!_hpMarket) { document.getElementById('hpCity').focus(); return; }
   if (!offered || offered < 1) { document.getElementById('hpOfferedRate').focus(); return; }
+  if (containsBadWord(production) || containsBadWord(location)) {
+    alert('Please keep production name and location professional. This is a community tool.');
+    return;
+  }
   try {
     await sbFetch('hot_potato', {
       method: 'POST',
