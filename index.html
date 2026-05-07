@@ -355,15 +355,13 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 .ticker-bar { grid-area: ticker; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; height: 32px; overflow: hidden; position: relative; }
 .ticker-label { font-size: 8px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); background: rgba(61,186,122,0.12); border-right: 1px solid rgba(61,186,122,0.2); padding: 0 10px; height: 100%; display: flex; align-items: center; flex-shrink: 0; }
 .ticker-track { flex: 1; overflow: hidden; position: relative; }
-.ticker-inner { display: flex; align-items: center; gap: 0; white-space: nowrap; animation: tickerScroll 8s linear infinite; }
-.ticker-inner:hover { animation-play-state: paused; }
+.ticker-inner { display: flex; align-items: center; gap: 0; white-space: nowrap; will-change: transform; }
 .tick-item { font-size: 11px; color: var(--muted); padding: 0 28px; border-right: 1px solid var(--border); flex-shrink: 0; }
 .tick-item strong { color: var(--gold); font-family: var(--mono); }
 .ticker-empty { font-size: 11px; color: var(--muted); padding: 0 16px; font-style: italic; opacity: 0.5; }
 .ticker-view-all { flex-shrink: 0; background: rgba(224,92,92,0.12); color: var(--red); border: none; border-left: 1px solid rgba(224,92,92,0.2); font-family: var(--font); font-size: 11px; font-weight: 700; padding: 0 14px; height: 100%; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
 .ticker-view-all:hover { background: rgba(224,92,92,0.22); }
 .hp-badge { background: var(--red); color: #fff; border-radius: 10px; font-size: 10px; padding: 1px 6px; margin-left: 5px; font-weight: 700; vertical-align: middle; }
-@keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
 /* ── Hot Potato ── */
 .btn-potato { background: rgba(224,92,92,0.1); color: var(--red); border: 1px solid rgba(224,92,92,0.25); }
@@ -2205,7 +2203,6 @@ async function loadTicker() {
     } else {
       const inner = document.getElementById('tickerInner');
       if (inner) {
-        inner.style.animation = 'none';
         inner.innerHTML = `<span style="padding: 0 20px; color: var(--muted); font-size: 11px;">No reports in the last 7 days — be the first to flag a lowball offer in your market.</span>`;
       }
       _tickerItems = [];
@@ -2332,32 +2329,51 @@ async function submitHP() {
   await loadTicker();
 }
 
-// ── Ticker Touch Drag ──
+// ── Ticker JS Animation ──
 (function() {
   const inner = document.getElementById('tickerInner');
   if (!inner) return;
-  let startX = 0, offsetX = 0, dragging = false;
+  const SPEED = window.innerWidth <= 860 ? 1.0 : 0.6;
+  let pos = 0, dragging = false, hovering = false;
+  let dragStartX = 0, dragStartPos = 0;
+
+  function oneWidth() { return inner.scrollWidth / 2; }
+
+  function wrap(p) {
+    const w = oneWidth();
+    if (!w) return p;
+    while (p > 0) p -= w;
+    while (p < -w) p += w;
+    return p;
+  }
+
+  function tick() {
+    if (!dragging && !hovering) {
+      pos = wrap(pos - SPEED);
+      inner.style.transform = `translateX(${pos}px)`;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  inner.addEventListener('mouseenter', () => { hovering = true; });
+  inner.addEventListener('mouseleave', () => { hovering = false; });
 
   inner.addEventListener('touchstart', e => {
-    const matrix = new DOMMatrix(getComputedStyle(inner).transform);
-    offsetX = matrix.m41;
-    startX = e.touches[0].clientX;
     dragging = true;
-    inner.style.animationPlayState = 'paused';
-    inner.style.transform = `translateX(${offsetX}px)`;
+    dragStartX = e.touches[0].clientX;
+    dragStartPos = pos;
   }, { passive: true });
 
   inner.addEventListener('touchmove', e => {
     if (!dragging) return;
-    const dx = e.touches[0].clientX - startX;
-    inner.style.transform = `translateX(${offsetX + dx}px)`;
+    const dx = e.touches[0].clientX - dragStartX;
+    pos = wrap(dragStartPos + dx);
+    inner.style.transform = `translateX(${pos}px)`;
   }, { passive: true });
 
-  inner.addEventListener('touchend', () => {
-    dragging = false;
-    inner.style.transform = '';
-    inner.style.animationPlayState = 'running';
-  }, { passive: true });
+  inner.addEventListener('touchend', () => { dragging = false; }, { passive: true });
+
+  requestAnimationFrame(tick);
 })();
 
 // ── Init ──
