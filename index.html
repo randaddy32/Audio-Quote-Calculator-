@@ -383,10 +383,12 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 .hp-field label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); display: block; margin-bottom: 5px; }
 .hp-field input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--gold); font-family: var(--mono); font-size: 18px; padding: 0 12px; height: 42px; outline: none; width: 100%; transition: border-color 0.15s; box-sizing: border-box; }
 .hp-field input:focus { border-color: var(--red); }
-.hp-stepper { display: flex; align-items: stretch; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; height: 42px; }
-.step-btn { background: none; border: none; color: var(--muted); font-size: 20px; font-weight: 300; padding: 0 10px; cursor: pointer; line-height: 1; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; display: flex; align-items: center; }
+.hp-stepper { display: flex; align-items: stretch; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; height: 34px; }
+.step-btn { background: none; border: none; color: var(--muted); font-size: 16px; font-weight: 400; padding: 0 10px; cursor: pointer; line-height: 1; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; display: flex; align-items: center; }
 .step-btn:active { background: var(--surface2); color: var(--text); }
-.step-val { flex: 1; text-align: center; font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--gold); display: flex; align-items: center; justify-content: center; }
+.step-val { flex: 1; text-align: center; font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--gold); display: flex; align-items: center; justify-content: center; }
+.hp-toggle-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; color: var(--muted); cursor: pointer; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; transition: all 0.15s; user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.hp-toggle-btn.active { border-color: var(--red); color: var(--text); background: var(--surface); }
 .hp-rec { font-size: 11px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 18px; display: flex; justify-content: space-between; }
 .hp-rec span { font-family: var(--mono); color: var(--green); }
 .hp-actions { display: flex; gap: 8px; }
@@ -842,22 +844,18 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
           </div>
         </div>
       </div>
-      <div style="display:flex;gap:10px;margin-bottom:12px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer">
-          <input type="checkbox" id="hpBoomOp" style="accent-color:var(--red);width:15px;height:15px"> Boom Op
-        </label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer">
-          <input type="checkbox" id="hpA2" style="accent-color:var(--red);width:15px;height:15px"> A2 / Utility
-        </label>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:8px">Crew needed</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div id="hpBoomOpBtn" class="hp-toggle-btn" onclick="toggleHP('hpBoomOp','hpBoomOpBtn')">🎤 Boom Op</div>
+        <div id="hpA2Btn" class="hp-toggle-btn" onclick="toggleHP('hpA2','hpA2Btn')">🔧 A2 / Utility</div>
+        <input type="hidden" id="hpBoomOp" value="0">
+        <input type="hidden" id="hpA2" value="0">
       </div>
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:8px">Crew situation</div>
       <div style="display:flex;gap:8px;margin-bottom:18px">
-        <label id="crewLocalBtn" onclick="setCrewType('local')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;transition:all 0.15s;white-space:nowrap">
-          <input type="radio" name="hpCrewType" id="hpCrewLocal" value="local" style="accent-color:var(--red)"> 🏠 Local
-        </label>
-        <label id="crewOOTBtn" onclick="setCrewType('oot')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;transition:all 0.15s;white-space:nowrap">
-          <input type="radio" name="hpCrewType" id="hpCrewOOT" value="oot" style="accent-color:var(--red)"> ✈️ Out of Town
-        </label>
+        <div id="crewLocalBtn" class="hp-toggle-btn" onclick="setCrewType('local')">🏠 Local</div>
+        <div id="crewOOTBtn" class="hp-toggle-btn" onclick="setCrewType('oot')">✈️ Out of Town</div>
+        <input type="hidden" name="hpCrewType" id="hpCrewLocal" value="">
       </div>
 
       <div class="hp-actions">
@@ -2308,10 +2306,11 @@ function openHP() {
     document.getElementById(id).value = '0';
     const d = document.getElementById(id + 'Val'); if (d) d.textContent = '0';
   });
-  document.getElementById('hpBoomOp').checked = false;
-  document.getElementById('hpA2').checked = false;
-  document.getElementById('hpCrewLocal').checked = false;
-  document.getElementById('hpCrewOOT').checked = false;
+  document.getElementById('hpBoomOp').value = '0';
+  document.getElementById('hpA2').value = '0';
+  document.getElementById('hpBoomOpBtn').classList.remove('active');
+  document.getElementById('hpA2Btn').classList.remove('active');
+  document.getElementById('hpCrewLocal').value = '';
   setCrewType(null);
   document.getElementById('hpForm').style.display = '';
   document.getElementById('hpConfirm').style.display = 'none';
@@ -2319,11 +2318,20 @@ function openHP() {
   setTimeout(() => (_hpMarket ? document.getElementById('hpProductionName') : citySelect).focus(), 100);
 }
 
+function toggleHP(hiddenId, btnId) {
+  const input = document.getElementById(hiddenId);
+  const btn = document.getElementById(btnId);
+  const on = input.value === '1';
+  input.value = on ? '0' : '1';
+  btn.classList.toggle('active', !on);
+}
+
+let _crewType = null;
 function setCrewType(type) {
-  document.getElementById('crewLocalBtn').style.borderColor = type === 'local' ? 'var(--red)' : 'var(--border)';
-  document.getElementById('crewLocalBtn').style.color       = type === 'local' ? 'var(--text)' : 'var(--muted)';
-  document.getElementById('crewOOTBtn').style.borderColor   = type === 'oot'   ? 'var(--red)' : 'var(--border)';
-  document.getElementById('crewOOTBtn').style.color         = type === 'oot'   ? 'var(--text)' : 'var(--muted)';
+  _crewType = type;
+  document.getElementById('crewLocalBtn').classList.toggle('active', type === 'local');
+  document.getElementById('crewOOTBtn').classList.toggle('active', type === 'oot');
+  document.getElementById('hpCrewLocal').value = type || '';
 }
 
 function hpCityChange() {
@@ -2359,9 +2367,9 @@ async function submitHP() {
         cameras:          parseInt(document.getElementById('hpCameras').value) || null,
         lavs:             parseInt(document.getElementById('hpLavs').value)    || null,
         ifbs:             parseInt(document.getElementById('hpIFBs').value)    || null,
-        boom_op:          document.getElementById('hpBoomOp').checked,
-        a2:               document.getElementById('hpA2').checked,
-        crew_type:        document.querySelector('input[name="hpCrewType"]:checked')?.value || null,
+        boom_op:          document.getElementById('hpBoomOp').value === '1',
+        a2:               document.getElementById('hpA2').value === '1',
+        crew_type:        document.getElementById('hpCrewLocal').value || null,
       })
     });
   } catch(e) {}
