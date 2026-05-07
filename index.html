@@ -312,6 +312,9 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
   .apply-btn-wrap { padding: 0 0 8px; }
   .apply-btn-wrap .btn { width: 100%; box-sizing: border-box; white-space: normal; text-align: center; justify-content: center; font-size: 14px; padding: 14px 10px; }
   .alerts-panel { width: 100vw; height: 100svh; overflow-x: hidden; }
+  .alerts-panel-hdr { padding: 12px 14px; }
+  .alerts-panel-title { font-size: 14px; }
+  .alerts-panel-sub { font-size: 11px; }
   .compose-overlay { padding: 0; align-items: flex-end; }
   .compose-modal { max-height: 92svh; border-radius: 16px 16px 0 0; width: 100%; }
   .hp-modal { padding: 24px 20px; }
@@ -757,14 +760,15 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
   <div class="alerts-panel">
     <div class="alerts-panel-hdr">
       <div style="flex:1">
-        <div class="alerts-panel-title">🚩 Production Alerts</div>
-        <div class="alerts-panel-sub">Anonymous flags from the community — last 7 days. Reporter stays anonymous. Production doesn't.</div>
-        <div style="font-size:11px;color:var(--red);margin-top:6px;opacity:0.8">The number after × is how many mixers got ghosted by that production.</div>
-        <select id="alertsMarketFilter" onchange="renderAlerts()" style="margin-top:10px;width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:13px;padding:7px 10px;outline:none;cursor:pointer">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div class="alerts-panel-title">🚩 Production Alerts</div>
+          <button class="alerts-close" onclick="closeAlerts()">✕</button>
+        </div>
+        <div class="alerts-panel-sub">Anonymous community flags · last 7 days · reporter stays anonymous.</div>
+        <select id="alertsMarketFilter" onchange="renderAlerts()" style="margin-top:8px;width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:13px;padding:7px 10px;outline:none;cursor:pointer">
           <option value="">All Markets</option>
         </select>
       </div>
-      <button class="alerts-close" onclick="closeAlerts()">✕</button>
     </div>
     <div class="alerts-body" id="alertsBody">
       <div class="alerts-empty">Loading...</div>
