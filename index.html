@@ -2344,6 +2344,8 @@ function hpCityChange() {
     const rec = market.laborStd + market.kitStd;
     _hpDayRate = rec;
     document.getElementById('hpRecRate').textContent = '$' + rec.toLocaleString() + '/day';
+    const calcCity = document.getElementById('yourCity');
+    if (calcCity) { calcCity.value = market.id; recalc(); }
   }
 }
 
