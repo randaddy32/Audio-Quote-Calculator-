@@ -1850,6 +1850,7 @@ function openPDF() {
   const url = URL.createObjectURL(blob);
   window.open(url, '_blank');
   setTimeout(() => URL.revokeObjectURL(url), 5000);
+  trackQuoteAction();
 }
 
 async function sharePDF() {
@@ -1881,6 +1882,7 @@ function copyQuote() {
 }
 
 function emailQuote() {
+  trackQuoteAction();
   const v    = getVals();
   const calc = calcLines(v);
   const market = MARKETS.find(m => m.id === v.yourCity);
@@ -2103,6 +2105,18 @@ async function fetchCounter() {
 }
 
 let _trackTimer = null;
+async function trackQuoteAction() {
+  const v = getVals();
+  const calc = calcLines(v);
+  const market = MARKETS.find(m => m.id === v.yourCity);
+  const marketName = market ? market.name : v.yourCityCustom || null;
+  if (!marketName || !calc.dayRate || calc.dayRate < 1) return;
+  try {
+    await sbFetch('quote_events', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ market: marketName, daily_rate: Math.round(calc.dayRate), duration_days: parseInt(v.days) || 1 }) });
+    fetchCounter();
+  } catch(e) {}
+}
+
 function maybeTrackQuote(market, dailyRate, days) {
   if (sessionStorage.getItem('aq_tracked')) return;
   clearTimeout(_trackTimer);
