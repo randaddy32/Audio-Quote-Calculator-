@@ -1993,10 +1993,15 @@ function openAlerts() {
   document.getElementById('alertsOverlay').classList.add('visible');
   const sel = document.getElementById('alertsMarketFilter');
   const markets = [...new Set(_tickerItems.map(q => q.market).filter(Boolean))].sort();
-  sel.innerHTML = '<option value="">All Markets</option>' + markets.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
-  const v = getVals();
-  const myMarket = MARKETS.find(m => m.id === v.yourCity);
-  if (myMarket && markets.includes(myMarket.name)) sel.value = myMarket.name;
+  if (markets.length >= 2) {
+    sel.innerHTML = '<option value="">All Markets</option>' + markets.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+    const v = getVals();
+    const myMarket = MARKETS.find(m => m.id === v.yourCity);
+    if (myMarket && markets.includes(myMarket.name)) sel.value = myMarket.name;
+    sel.style.display = '';
+  } else {
+    sel.style.display = 'none';
+  }
   renderAlerts();
 }
 function closeAlerts() {
