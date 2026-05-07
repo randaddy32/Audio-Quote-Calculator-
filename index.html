@@ -361,7 +361,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 .hdr-counter.visible { opacity: 1; }
 
 /* ── Ticker ── */
-.ticker-bar { grid-area: ticker; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; height: 32px; overflow: hidden; position: relative; }
+.ticker-bar { grid-area: ticker; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; height: 32px; overflow: hidden; position: relative; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .ticker-label { font-size: 8px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); background: rgba(61,186,122,0.12); border-right: 1px solid rgba(61,186,122,0.2); padding: 0 10px; height: 100%; display: flex; align-items: center; flex-shrink: 0; }
 .ticker-track { flex: 1; overflow: hidden; position: relative; }
 .ticker-inner { display: flex; align-items: center; gap: 0; white-space: nowrap; will-change: transform; }
@@ -2232,7 +2232,7 @@ async function loadTicker() {
     }).join('');
 
     const inner = document.getElementById('tickerInner');
-    if (inner && build) inner.innerHTML = build + build;
+    if (inner && build) { inner.innerHTML = build + build + build; tickerReset(); }
 
     if (document.getElementById('alertsOverlay').classList.contains('visible')) {
       renderAlerts();
@@ -2342,50 +2342,66 @@ async function submitHP() {
 }
 
 // ── Ticker JS Animation ──
-(function() {
+const _ticker = {
+  pos: 0, dragging: false, hovering: false,
+  dragStartX: 0, dragStartPos: 0,
+  speed: window.innerWidth <= 860 ? 1.0 : 0.6,
+};
+
+function tickerOneWidth() {
   const inner = document.getElementById('tickerInner');
-  if (!inner) return;
-  const SPEED = window.innerWidth <= 860 ? 1.0 : 0.6;
-  let pos = 0, dragging = false, hovering = false;
-  let dragStartX = 0, dragStartPos = 0;
+  return inner ? inner.scrollWidth / 3 : 0;
+}
 
-  function oneWidth() { return inner.scrollWidth / 2; }
+function tickerWrap(p) {
+  const w = tickerOneWidth();
+  if (!w) return p;
+  if (p > 0)      p -= w;
+  if (p < -(w*2)) p += w;
+  return p;
+}
 
-  function wrap(p) {
-    const w = oneWidth();
-    if (!w) return p;
-    while (p > 0) p -= w;
-    while (p < -w) p += w;
-    return p;
+function tickerReset() {
+  _ticker.pos = -tickerOneWidth();
+}
+
+(function tickerLoop() {
+  const inner = document.getElementById('tickerInner');
+  if (inner && !_ticker.dragging && !_ticker.hovering) {
+    _ticker.pos = tickerWrap(_ticker.pos - _ticker.speed);
+    inner.style.transform = `translateX(${_ticker.pos}px)`;
   }
+  requestAnimationFrame(tickerLoop);
+})();
 
-  function tick() {
-    if (!dragging && !hovering) {
-      pos = wrap(pos - SPEED);
-      inner.style.transform = `translateX(${pos}px)`;
-    }
-    requestAnimationFrame(tick);
-  }
+(function() {
+  const bar = document.getElementById('tickerBar');
+  if (!bar) return;
 
-  inner.addEventListener('mouseenter', () => { hovering = true; });
-  inner.addEventListener('mouseleave', () => { hovering = false; });
+  bar.addEventListener('mouseenter', () => { _ticker.hovering = true; });
+  bar.addEventListener('mouseleave', () => { _ticker.hovering = false; });
 
-  inner.addEventListener('touchstart', e => {
-    dragging = true;
-    dragStartX = e.touches[0].clientX;
-    dragStartPos = pos;
+  bar.addEventListener('touchstart', e => {
+    if (e.target.closest('.ticker-view-all')) return;
+    _ticker.dragging = true;
+    _ticker.dragStartX = e.touches[0].clientX;
+    _ticker.dragStartPos = _ticker.pos;
   }, { passive: true });
 
-  inner.addEventListener('touchmove', e => {
-    if (!dragging) return;
-    const dx = e.touches[0].clientX - dragStartX;
-    pos = wrap(dragStartPos + dx);
-    inner.style.transform = `translateX(${pos}px)`;
+  bar.addEventListener('touchmove', e => {
+    if (!_ticker.dragging) return;
+    const dx = e.touches[0].clientX - _ticker.dragStartX;
+    const raw = _ticker.dragStartPos + dx;
+    const w = tickerOneWidth();
+    _ticker.pos = raw > 0 ? raw - w : raw < -(w*2) ? raw + w : raw;
+    const inner = document.getElementById('tickerInner');
+    if (inner) inner.style.transform = `translateX(${_ticker.pos}px)`;
   }, { passive: true });
 
-  inner.addEventListener('touchend', () => { dragging = false; }, { passive: true });
-
-  requestAnimationFrame(tick);
+  bar.addEventListener('touchend', () => {
+    _ticker.dragging = false;
+    _ticker.pos = tickerWrap(_ticker.pos);
+  }, { passive: true });
 })();
 
 // ── Init ──
