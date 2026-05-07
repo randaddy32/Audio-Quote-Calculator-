@@ -488,7 +488,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
       <span class="ticker-empty">Loading market activity...</span>
     </div>
   </div>
-  <button class="ticker-view-all" onclick="openAlerts()"><span class="ticker-view-label">View All</span> → <span class="hp-badge" id="hpBadge" style="display:none"></span></button>
+  <button class="ticker-view-all" onclick="document.getElementById('alertsOverlay').classList.contains('visible')?closeAlerts():openAlerts()"><span class="ticker-view-label">View All</span> → <span class="hp-badge" id="hpBadge" style="display:none"></span></button>
 </div>
 
 <div class="tick-popover" id="tickPopover"></div>
