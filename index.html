@@ -2219,7 +2219,7 @@ async function loadTicker() {
       const prod    = q.production ? ` &nbsp;·&nbsp; <strong>${q.production}</strong>` : '';
       const gap     = q.avg_offered ? ` &nbsp;·&nbsp; quoted <strong>$${q.avg_offered.toLocaleString()}</strong> — went quiet` : ' &nbsp;·&nbsp; went quiet';
       const crewStr = q.crew_type === 'oot' ? ' &nbsp;·&nbsp; ✈️ OOT' : q.crew_type === 'local' ? ' &nbsp;·&nbsp; 🏠 local' : '';
-      return `<span class="tick-item" data-idx="${i}" onmouseenter="showTickPopover(this,${i})" onmouseleave="hideTickPopover()" ontouchstart="showTickPopover(this,${i})">🚩 ${q.market}${prod} &nbsp;·&nbsp; <strong>${q.count}× no callback</strong>${gap}${crewStr}</span>`;
+      return `<span class="tick-item" data-idx="${i}">🚩 ${q.market}${prod} &nbsp;·&nbsp; <strong>${q.count}× no callback</strong>${gap}${crewStr}</span>`;
     }).join('');
 
     const inner = document.getElementById('tickerInner');
@@ -2245,17 +2245,18 @@ function openHP() {
   const cityWrap = document.getElementById('hpCityWrap');
   const citySelect = document.getElementById('hpCity');
 
+  cityWrap.style.display = '';
+  if (citySelect.options.length <= 1) {
+    MARKETS.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.name; o.textContent = m.name;
+      citySelect.appendChild(o);
+    });
+  }
   if (_hpMarket) {
-    cityWrap.style.display = 'none';
+    citySelect.value = _hpMarket;
+    hpCityChange();
   } else {
-    cityWrap.style.display = '';
-    if (citySelect.options.length <= 1) {
-      MARKETS.forEach(m => {
-        const o = document.createElement('option');
-        o.value = m.name; o.textContent = m.name;
-        citySelect.appendChild(o);
-      });
-    }
     citySelect.value = '';
   }
 
