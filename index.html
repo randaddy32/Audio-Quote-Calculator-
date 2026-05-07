@@ -813,7 +813,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <label>What did you quote them? (per day)</label>
         <input type="number" id="hpOfferedRate" placeholder="e.g. 1400" inputmode="decimal">
       </div>
-      <div class="hp-rec">
+      <div class="hp-rec" id="hpRecWrap" style="display:none">
         <span>Market rate for your city</span>
         <span id="hpRecRate">—</span>
       </div>
@@ -2307,7 +2307,8 @@ function openHP() {
     citySelect.value = '';
   }
 
-  document.getElementById('hpRecRate').textContent = _hpDayRate > 0 ? '$' + _hpDayRate.toLocaleString() + '/day' : 'Select city above';
+  document.getElementById('hpRecRate').textContent = '';
+  document.getElementById('hpRecWrap').style.display = _hpDayRate > 0 ? '' : 'none';
   document.getElementById('hpOfferedRate').value = '';
   document.getElementById('hpProductionName').value = '';
   document.getElementById('hpLocation').value = '';
@@ -2351,6 +2352,7 @@ function hpCityChange() {
     const rec = market.laborStd + market.kitStd;
     _hpDayRate = rec;
     document.getElementById('hpRecRate').textContent = '$' + rec.toLocaleString() + '/day';
+    document.getElementById('hpRecWrap').style.display = '';
     const calcCity = document.getElementById('yourCity');
     if (calcCity) { calcCity.value = market.id; recalc(); }
   }
