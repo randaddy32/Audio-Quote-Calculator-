@@ -758,10 +758,13 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 <div class="alerts-overlay" id="alertsOverlay" onclick="if(event.target===this)closeAlerts()">
   <div class="alerts-panel">
     <div class="alerts-panel-hdr">
-      <div>
+      <div style="flex:1">
         <div class="alerts-panel-title">🚩 Production Alerts</div>
         <div class="alerts-panel-sub">Anonymous flags from the community — last 7 days. Reporter stays anonymous. Production doesn't.</div>
         <div style="font-size:11px;color:var(--red);margin-top:6px;opacity:0.8">The number after × is how many mixers got ghosted by that production.</div>
+        <select id="alertsMarketFilter" onchange="renderAlerts()" style="margin-top:10px;width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:13px;padding:7px 10px;outline:none;cursor:pointer">
+          <option value="">All Markets</option>
+        </select>
       </div>
       <button class="alerts-close" onclick="closeAlerts()">✕</button>
     </div>
@@ -1980,6 +1983,12 @@ function fmtPhone(el) {
 // ── Alerts Panel ──
 function openAlerts() {
   document.getElementById('alertsOverlay').classList.add('visible');
+  const sel = document.getElementById('alertsMarketFilter');
+  const markets = [...new Set(_tickerItems.map(q => q.market).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All Markets</option>' + markets.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+  const v = getVals();
+  const myMarket = MARKETS.find(m => m.id === v.yourCity);
+  if (myMarket && markets.includes(myMarket.name)) sel.value = myMarket.name;
   renderAlerts();
 }
 function closeAlerts() {
@@ -1993,7 +2002,15 @@ function renderAlerts() {
     return;
   }
 
-  body.innerHTML = _tickerItems.map(q => {
+  const filterVal = (document.getElementById('alertsMarketFilter') || {}).value || '';
+  const filtered = filterVal ? _tickerItems.filter(q => q.market === filterVal) : _tickerItems;
+
+  if (!filtered.length) {
+    body.innerHTML = `<div class="alerts-empty">No flags in ${filterVal} in the last 7 days.<br>The community is holding the line. 💪</div>`;
+    return;
+  }
+
+  body.innerHTML = filtered.map(q => {
     const chips = [
       q.avg_cameras ? `📷 ${q.avg_cameras} cam${q.avg_cameras !== 1 ? 's' : ''}` : null,
       q.avg_lavs    ? `🎙 ${q.avg_lavs} lav${q.avg_lavs !== 1 ? 's' : ''}`        : null,
