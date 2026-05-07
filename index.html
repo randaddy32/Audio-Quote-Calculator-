@@ -2007,6 +2007,7 @@ function fmtPhone(el) {
 
 // ── Alerts Panel ──
 function openAlerts() {
+  _ticker.paused = true;
   document.getElementById('alertsOverlay').classList.add('visible');
   const sel = document.getElementById('alertsMarketFilter');
   const markets = [...new Set(_tickerItems.map(q => q.market).filter(Boolean))].sort();
@@ -2022,6 +2023,7 @@ function openAlerts() {
   renderAlerts();
 }
 function closeAlerts() {
+  _ticker.paused = false;
   document.getElementById('alertsOverlay').classList.remove('visible');
 }
 
@@ -2384,7 +2386,7 @@ async function submitHP() {
 
 // ── Ticker JS Animation ──
 const _ticker = {
-  pos: 0, dragging: false, hovering: false,
+  pos: 0, dragging: false, hovering: false, paused: false,
   dragStartX: 0, dragStartPos: 0,
   speed: window.innerWidth <= 860 ? 1.0 : 0.6,
 };
@@ -2408,7 +2410,7 @@ function tickerReset() {
 
 (function tickerLoop() {
   const inner = document.getElementById('tickerInner');
-  if (inner && !_ticker.dragging && !_ticker.hovering) {
+  if (inner && !_ticker.dragging && !_ticker.hovering && !_ticker.paused) {
     _ticker.pos = tickerWrap(_ticker.pos - _ticker.speed);
     inner.style.transform = `translateX(${_ticker.pos}px)`;
   }
