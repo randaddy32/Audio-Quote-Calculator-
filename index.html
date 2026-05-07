@@ -2373,7 +2373,7 @@ function closeHP() {
   document.getElementById('hpOverlay').classList.remove('visible');
 }
 
-const _badWords = ['dick','cock','pussy','cunt','penis','vagina','fuck','shit','ass','bitch','bastard','whore','slut','fag','nigger','nigga','retard','twat','wanker','prick'];
+const _badWords = ['cock','pussy','cunt','penis','vagina','bastard','whore','slut','fag','nigger','nigga','retard','twat','wanker','prick'];
 function containsBadWord(str) {
   if (!str) return false;
   const clean = str.toLowerCase().replace(/[^a-z]/g, '');
