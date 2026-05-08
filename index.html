@@ -2085,6 +2085,7 @@ function renderAlerts() {
       q.avg_prod_offer ? `<div class="alert-rate-row"><span class="alert-rate-label">Production offered</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_prod_offer.toLocaleString()}/day</span></div>` : '',
       q.avg_labor      ? `<div class="alert-rate-row"><span class="alert-rate-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
       q.avg_kit        ? `<div class="alert-rate-row"><span class="alert-rate-label">Kit</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
+      (q.avg_labor && q.avg_kit) ? `<div class="alert-rate-row"><span class="alert-rate-label">Quoted total</span><span class="alert-rate-val" style="color:var(--gold)">$${(q.avg_labor + q.avg_kit).toLocaleString()}/day</span></div>` : '',
       (!q.avg_labor && q.avg_offered) ? `<div class="alert-rate-row"><span class="alert-rate-label">Mixer quoted${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
       q.avg_rec        ? `<div class="alert-rate-row"><span class="alert-rate-label">Market rate</span><span class="alert-rate-val" style="color:var(--green)">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
     ].join('');
@@ -2130,6 +2131,7 @@ function showTickPopover(el, idx) {
     q.avg_prod_offer ? `<div class="tp-row"><span class="tp-label">Production offered</span><span class="tp-val red">$${q.avg_prod_offer.toLocaleString()}/day</span></div>` : '',
     q.avg_labor      ? `<div class="tp-row"><span class="tp-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="tp-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
     q.avg_kit        ? `<div class="tp-row"><span class="tp-label">Kit</span><span class="tp-val" style="color:var(--gold)">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
+    (q.avg_labor && q.avg_kit) ? `<div class="tp-row"><span class="tp-label">Quoted total</span><span class="tp-val" style="color:var(--gold)">$${(q.avg_labor + q.avg_kit).toLocaleString()}/day</span></div>` : '',
     (!q.avg_labor && q.avg_offered) ? `<div class="tp-row"><span class="tp-label">Mixer quoted${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="tp-val" style="color:var(--gold)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
     q.avg_rec        ? `<div class="tp-row"><span class="tp-label">Market rate</span><span class="tp-val green">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
   ].join('');
