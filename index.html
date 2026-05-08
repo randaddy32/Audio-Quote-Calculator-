@@ -384,6 +384,11 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
 .hp-field input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--gold); font-family: var(--mono); font-size: 18px; padding: 0 12px; height: 42px; outline: none; width: 100%; transition: border-color 0.15s; box-sizing: border-box; }
 .hp-field input:focus { border-color: var(--red); }
 .hp-field input[type="date"] { height: 42px; appearance: none; -webkit-appearance: none; }
+.hp-field select { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--gold); font-family: var(--mono); font-size: 15px; padding: 0 12px; height: 42px; outline: none; width: 100%; transition: border-color 0.15s; box-sizing: border-box; appearance: none; -webkit-appearance: none; }
+.hp-field select:focus { border-color: var(--red); }
+.hp-field select option { background: var(--surface2); color: var(--text); }
+.hp-field textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--font); font-size: 14px; padding: 10px 12px; outline: none; width: 100%; transition: border-color 0.15s; box-sizing: border-box; resize: vertical; min-height: 72px; }
+.hp-field textarea:focus { border-color: var(--red); }
 .hp-stepper { display: flex; align-items: stretch; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; height: 34px; }
 .step-btn { background: none; border: none; color: var(--muted); font-size: 16px; font-weight: 400; padding: 0 10px; cursor: pointer; line-height: 1; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; display: flex; align-items: center; }
 .step-btn:active { background: var(--surface2); color: var(--text); }
@@ -807,6 +812,20 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <input type="text" id="hpProductionName" placeholder="e.g. Netflix Docuseries, Acme Films...">
       </div>
       <div class="hp-field">
+        <label>Project type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label>
+        <select id="hpProjectType">
+          <option value="">— Select type —</option>
+          <option value="Commercial">Commercial</option>
+          <option value="Narrative">Narrative</option>
+          <option value="Documentary">Documentary</option>
+          <option value="Corporate">Corporate</option>
+          <option value="Micro-Drama">Micro-Drama</option>
+          <option value="Reality">Reality</option>
+          <option value="News">News / Current Affairs</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="hp-field">
         <label>Shoot location <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label>
         <input type="text" id="hpLocation" placeholder="e.g. McCormick Place, Downtown LA...">
       </div>
@@ -824,6 +843,17 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
       <div class="hp-field">
         <label>What did they offer?</label>
         <input type="number" id="hpProdOffer" placeholder="e.g. 800" inputmode="decimal">
+      </div>
+      <div class="hp-field">
+        <label>Deal type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label>
+        <select id="hpDealType">
+          <option value="">— Select deal type —</option>
+          <option value="Paid">Paid</option>
+          <option value="Deferred">Deferred</option>
+          <option value="Unpaid">Unpaid</option>
+          <option value="Volunteer">Volunteer</option>
+          <option value="Backend">Backend</option>
+        </select>
       </div>
       <div class="hp-field">
         <label>What did you quote? <span style="font-size:11px;color:var(--muted)">(per day, all-in)</span></label>
@@ -878,6 +908,11 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <div id="crewLocalBtn" class="hp-toggle-btn" onclick="setCrewType('local')">🏠 Local</div>
         <div id="crewOOTBtn" class="hp-toggle-btn" onclick="setCrewType('oot')">✈️ Out of Town</div>
         <input type="hidden" name="hpCrewType" id="hpCrewLocal" value="">
+      </div>
+
+      <div class="hp-field">
+        <label>Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional — no names, keep it professional)</span></label>
+        <textarea id="hpNotes" placeholder="e.g. Asked to volunteer for a paid production, ghosted after rate was given..."></textarea>
       </div>
 
       <div class="hp-actions">
@@ -2366,6 +2401,9 @@ function openHP() {
   document.getElementById('hpBoomOpBtn').classList.remove('active');
   document.getElementById('hpA2Btn').classList.remove('active');
   document.getElementById('hpCrewLocal').value = '';
+  document.getElementById('hpProjectType').value = '';
+  document.getElementById('hpDealType').value = '';
+  document.getElementById('hpNotes').value = '';
   setDayType('');
   setCrewType(null);
   document.getElementById('hpForm').style.display = '';
@@ -2457,6 +2495,9 @@ async function submitHP() {
         boom_op:          document.getElementById('hpBoomOp').value === '1',
         a2:               document.getElementById('hpA2').value === '1',
         crew_type:        document.getElementById('hpCrewLocal').value || null,
+        project_type:     document.getElementById('hpProjectType').value || null,
+        deal_type:        document.getElementById('hpDealType').value || null,
+        notes:            document.getElementById('hpNotes').value.trim() || null,
       })
     });
   } catch(e) {}
