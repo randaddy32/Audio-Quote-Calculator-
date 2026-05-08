@@ -846,10 +846,24 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <label>What did they offer?</label>
         <input type="number" id="hpProdOffer" placeholder="e.g. 800" inputmode="decimal">
       </div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:8px">What did you quote?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="hp-field" style="margin:0">
+          <label>Labor <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">(per day)</span></label>
+          <input type="number" id="hpQuotedLabor" placeholder="e.g. 950" inputmode="decimal" oninput="updateHPTotal()">
+        </div>
+        <div class="hp-field" style="margin:0">
+          <label>Kit <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">(per day)</span></label>
+          <input type="number" id="hpQuotedKit" placeholder="e.g. 600" inputmode="decimal" oninput="updateHPTotal()">
+        </div>
+      </div>
       <div class="hp-field">
-        <label>What did you quote? <span style="font-size:11px;color:var(--muted)">(per day, all-in)</span></label>
-        <input type="number" id="hpQuotedLabor" placeholder="e.g. 1550" inputmode="decimal">
-        <input type="hidden" id="hpQuotedKit" value="">
+        <label>Add-ons <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional — overtime, expendables, etc.)</span></label>
+        <input type="number" id="hpQuotedAddons" placeholder="e.g. 150" inputmode="decimal" oninput="updateHPTotal()">
+      </div>
+      <div id="hpTotalWrap" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted)">Total quoted</span>
+        <span id="hpTotalVal" style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--gold)">—</span>
       </div>
       <div class="hp-field">
         <label>Deal type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label>
@@ -2113,13 +2127,13 @@ function renderAlerts() {
       q.crew_type === 'local' ? '🏠 Local crew'       : null,
     ].filter(Boolean);
 
+    const quotedTotal = (q.avg_labor || 0) + (q.avg_kit || 0) + (q.avg_addons || 0);
     const rateRows = [
       q.avg_prod_offer ? `<div class="alert-rate-row"><span class="alert-rate-label">Production offered</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_prod_offer.toLocaleString()}/day</span></div>` : '',
-      (q.avg_labor && q.avg_kit)  ? `<div class="alert-rate-row"><span class="alert-rate-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
-      (q.avg_labor && q.avg_kit)  ? `<div class="alert-rate-row"><span class="alert-rate-label">Kit</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
-      (q.avg_labor && q.avg_kit)  ? `<div class="alert-rate-row"><span class="alert-rate-label">Quoted total</span><span class="alert-rate-val" style="color:var(--gold)">$${(q.avg_labor + q.avg_kit).toLocaleString()}/day</span></div>` : '',
-      (q.avg_labor && !q.avg_kit) ? `<div class="alert-rate-row"><span class="alert-rate-label">Your quote (all-in)</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
-      (!q.avg_labor && q.avg_offered) ? `<div class="alert-rate-row"><span class="alert-rate-label">Mixer quoted${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
+      q.avg_labor      ? `<div class="alert-rate-row"><span class="alert-rate-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
+      q.avg_kit        ? `<div class="alert-rate-row"><span class="alert-rate-label">Kit</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
+      q.avg_addons     ? `<div class="alert-rate-row"><span class="alert-rate-label">Add-ons</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_addons.toLocaleString()}</span></div>` : '',
+      quotedTotal > 0  ? `<div class="alert-rate-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:4px"><span class="alert-rate-label" style="font-weight:700;color:var(--text)">Total quoted</span><span class="alert-rate-val" style="color:var(--gold);font-weight:700">$${quotedTotal.toLocaleString()}/day</span></div>` : '',
       q.avg_rec        ? `<div class="alert-rate-row"><span class="alert-rate-label">Market rate</span><span class="alert-rate-val" style="color:var(--green)">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
     ].join('');
 
@@ -2273,7 +2287,7 @@ async function fetchHPCount() {
 async function loadTicker() {
   try {
     const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const res = await sbFetch(`hot_potato?select=market,production_offer,quoted_labor,quoted_kit,offered_rate,day_type,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,project_type,deal_type,notes,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
+    const res = await sbFetch(`hot_potato?select=market,production_offer,quoted_labor,quoted_kit,quoted_addons,offered_rate,day_type,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,project_type,deal_type,notes,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
     const data = res.ok ? await res.json() : [];
 
     let items;
@@ -2282,12 +2296,13 @@ async function loadTicker() {
       for (const row of data) {
         if (!row.market) continue;
         const key = (row.production_name || '') + '|' + row.market;
-        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, prod_offers: [], quoted_labors: [], quoted_kits: [], offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], day_types: [], project_types: [], deal_types: [], notes_list: [], latest_at: row.created_at };
+        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, prod_offers: [], quoted_labors: [], quoted_kits: [], quoted_addons: [], offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], day_types: [], project_types: [], deal_types: [], notes_list: [], latest_at: row.created_at };
         byKey[key].count++;
         if (row.created_at > byKey[key].latest_at) byKey[key].latest_at = row.created_at;
         if (row.production_offer) byKey[key].prod_offers.push(row.production_offer);
         if (row.quoted_labor)     byKey[key].quoted_labors.push(row.quoted_labor);
         if (row.quoted_kit)       byKey[key].quoted_kits.push(row.quoted_kit);
+        if (row.quoted_addons)    byKey[key].quoted_addons.push(row.quoted_addons);
         if (row.offered_rate)     byKey[key].offered.push(row.offered_rate);
         if (row.day_type)         byKey[key].day_types.push(row.day_type);
         if (row.recommended_rate) byKey[key].rec.push(row.recommended_rate);
@@ -2313,6 +2328,7 @@ async function loadTicker() {
           avg_prod_offer:  d.prod_offers.length    ? Math.round(d.prod_offers.reduce((a, b) => a + b, 0)    / d.prod_offers.length)    : null,
           avg_labor:       d.quoted_labors.length  ? Math.round(d.quoted_labors.reduce((a, b) => a + b, 0)  / d.quoted_labors.length)  : null,
           avg_kit:         d.quoted_kits.length    ? Math.round(d.quoted_kits.reduce((a, b) => a + b, 0)    / d.quoted_kits.length)    : null,
+          avg_addons:      d.quoted_addons.length  ? Math.round(d.quoted_addons.reduce((a, b) => a + b, 0)  / d.quoted_addons.length)  : null,
           day_type:        d.day_types.length      ? (d.day_types.filter(t => t === '12').length > d.day_types.length / 2 ? '12' : '10') : null,
           avg_offered: d.offered.length ? Math.round(d.offered.reduce((a, b) => a + b, 0) / d.offered.length) : null,
           avg_rec:     d.rec.length     ? Math.round(d.rec.reduce((a, b) => a + b, 0)     / d.rec.length)     : null,
@@ -2399,6 +2415,8 @@ function openHP() {
   document.getElementById('hpProdOffer').value = '';
   document.getElementById('hpQuotedLabor').value = '';
   document.getElementById('hpQuotedKit').value = '';
+  document.getElementById('hpQuotedAddons').value = '';
+  document.getElementById('hpTotalVal').textContent = '—';
   document.getElementById('hpOfferedRate').value = '0';
   document.getElementById('hpProductionName').value = '';
   document.getElementById('hpLocation').value = '';
@@ -2445,6 +2463,15 @@ function setCrewType(type) {
   document.getElementById('hpCrewLocal').value = type || '';
 }
 
+function updateHPTotal() {
+  const labor  = parseInt(document.getElementById('hpQuotedLabor').value)  || 0;
+  const kit    = parseInt(document.getElementById('hpQuotedKit').value)    || 0;
+  const addons = parseInt(document.getElementById('hpQuotedAddons').value) || 0;
+  const total  = labor + kit + addons;
+  const el = document.getElementById('hpTotalVal');
+  el.textContent = total > 0 ? '$' + total.toLocaleString() : '—';
+}
+
 function hpCityChange() {
   const sel = document.getElementById('hpCity');
   _hpMarket = sel.value;
@@ -2474,7 +2501,8 @@ async function submitHP() {
   const prodOffer    = parseInt(document.getElementById('hpProdOffer').value, 10) || null;
   const quotedLabor  = parseInt(document.getElementById('hpQuotedLabor').value, 10) || null;
   const quotedKit    = parseInt(document.getElementById('hpQuotedKit').value, 10) || null;
-  const offered      = (quotedLabor || 0) + (quotedKit || 0);
+  const quotedAddons = parseInt(document.getElementById('hpQuotedAddons').value, 10) || null;
+  const offered      = (quotedLabor || 0) + (quotedKit || 0) + (quotedAddons || 0);
   const production   = document.getElementById('hpProductionName').value.trim();
   const location     = document.getElementById('hpLocation').value.trim();
   const dayType      = document.getElementById('hpDayType').value || null;
@@ -2493,6 +2521,7 @@ async function submitHP() {
         production_offer:  prodOffer,
         quoted_labor:      quotedLabor,
         quoted_kit:        quotedKit,
+        quoted_addons:     quotedAddons,
         offered_rate:      offered,
         day_type:          dayType,
         recommended_rate:  Math.round(_hpDayRate),
