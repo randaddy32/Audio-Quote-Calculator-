@@ -2082,7 +2082,7 @@ function renderAlerts() {
             ${q.location ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(q.location)}</div>` : ''}
             ${dateStr    ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${dateStr}</div>` : ''}
           </div>
-          <div class="alert-badge" style="align-self:flex-start">🚩 ${q.count}× no callback</div>
+          <div class="alert-badge" style="align-self:flex-start">🚩 ${q.count}× flagged</div>
         </div>
         <div class="alert-card-body">
           ${rateRows}
@@ -2118,7 +2118,7 @@ function showTickPopover(el, idx) {
   const pop = document.getElementById('tickPopover');
   pop.innerHTML = `
     <div class="tp-prod">🚩 ${q.production || 'Unnamed Production'}</div>
-    <div class="tp-market">${q.market} &nbsp;·&nbsp; ${q.count}× no callback</div>
+    <div class="tp-market">${q.market} &nbsp;·&nbsp; ${q.count}× flagged</div>
     ${q.location   ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(q.location)}</div>` : ''}
     ${q.shoot_date ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${new Date(q.shoot_date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>` : ''}
     ${gap}
@@ -2273,7 +2273,7 @@ async function loadTicker() {
       const loc     = q.location   ? ` &nbsp;·&nbsp; 📍 ${q.location}` : '';
       const gap     = q.avg_offered ? ` &nbsp;·&nbsp; quoted <strong>$${q.avg_offered.toLocaleString()}</strong> — went quiet` : ' &nbsp;·&nbsp; went quiet';
       const crewStr = q.crew_type === 'oot' ? ' &nbsp;·&nbsp; ✈️ OOT' : q.crew_type === 'local' ? ' &nbsp;·&nbsp; 🏠 local' : '';
-      return `<span class="tick-item" data-idx="${i}">🚩 ${q.market}${prod}${loc} &nbsp;·&nbsp; <strong>${q.count}× no callback</strong>${gap}${crewStr}</span>`;
+      return `<span class="tick-item" data-idx="${i}">🚩 ${q.market}${prod}${loc} &nbsp;·&nbsp; <strong>${q.count}× flagged</strong>${gap}${crewStr}</span>`;
     }).join('');
 
     const inner = document.getElementById('tickerInner');
