@@ -2002,7 +2002,7 @@ document.addEventListener('keydown', e => {
   if (e.key==='?' && !typing)         { e.preventDefault(); toggleShortcuts(); return; }
   if (e.key==='Escape')               { $('shortcutsOverlay').classList.remove('visible'); closeMarket(); closeCompose(); closeAlerts(); return; }
   if (!e[MOD]) return;
-  if (e.key==='Enter')                { e.preventDefault(); recalcFocus(); return; }
+  if (e.key==='Enter')                { e.preventDefault(); if ($('hpOverlay').classList.contains('visible')) { submitHP(); } else { recalcFocus(); } return; }
   if (e.key==='C' && e.shiftKey)      { e.preventDefault(); copyQuote(); return; }
   if ((e.key==='e'||e.key==='E') && !e.shiftKey) { e.preventDefault(); emailQuote(); return; }
   if ((e.key==='m'||e.key==='M'))     { e.preventDefault(); openMarket(); return; }
