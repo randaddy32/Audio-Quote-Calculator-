@@ -825,10 +825,17 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <label>Production offer</label>
         <input type="number" id="hpProdOffer" placeholder="e.g. 800" inputmode="decimal">
       </div>
-      <div class="hp-field">
-        <label>What did you quote?</label>
-        <input type="number" id="hpOfferedRate" placeholder="e.g. 1400" inputmode="decimal">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="hp-field" style="margin:0">
+          <label>Labor rate</label>
+          <input type="number" id="hpQuotedLabor" placeholder="e.g. 900" inputmode="decimal">
+        </div>
+        <div class="hp-field" style="margin:0">
+          <label>Kit rate</label>
+          <input type="number" id="hpQuotedKit" placeholder="e.g. 650" inputmode="decimal">
+        </div>
       </div>
+      <input type="hidden" id="hpOfferedRate" value="0">
       <div class="hp-rec" id="hpRecWrap" style="display:none">
         <span>Market rate for your city</span>
         <span id="hpRecRate">—</span>
@@ -2335,7 +2342,9 @@ function openHP() {
   document.getElementById('hpRecWrap').style.display = _hpDayRate > 0 ? '' : 'none';
   if (_hpMarket) hpCityChange();
   document.getElementById('hpProdOffer').value = '';
-  document.getElementById('hpOfferedRate').value = '';
+  document.getElementById('hpQuotedLabor').value = '';
+  document.getElementById('hpQuotedKit').value = '';
+  document.getElementById('hpOfferedRate').value = '0';
   document.getElementById('hpProductionName').value = '';
   document.getElementById('hpLocation').value = '';
   document.getElementById('hpShootDate').value = '';
@@ -2404,12 +2413,15 @@ function containsBadWord(str) {
 }
 
 async function submitHP() {
-  const prodOffer = parseInt(document.getElementById('hpProdOffer').value, 10) || null;
-  const offered = parseInt(document.getElementById('hpOfferedRate').value, 10);
-  const production = document.getElementById('hpProductionName').value.trim();
-  const location  = document.getElementById('hpLocation').value.trim();
+  const prodOffer    = parseInt(document.getElementById('hpProdOffer').value, 10) || null;
+  const quotedLabor  = parseInt(document.getElementById('hpQuotedLabor').value, 10) || null;
+  const quotedKit    = parseInt(document.getElementById('hpQuotedKit').value, 10) || null;
+  const offered      = (quotedLabor || 0) + (quotedKit || 0);
+  const production   = document.getElementById('hpProductionName').value.trim();
+  const location     = document.getElementById('hpLocation').value.trim();
+  const dayType      = document.getElementById('hpDayType').value || null;
   if (!_hpMarket) { document.getElementById('hpCity').focus(); return; }
-  if (!offered || offered < 1) { document.getElementById('hpOfferedRate').focus(); return; }
+  if (!offered || offered < 1) { document.getElementById('hpQuotedLabor').focus(); return; }
   if (containsBadWord(production) || containsBadWord(location)) {
     alert('Please keep production name and location professional. This is a community tool.');
     return;
@@ -2421,7 +2433,10 @@ async function submitHP() {
       body: JSON.stringify({
         market:            _hpMarket,
         production_offer:  prodOffer,
+        quoted_labor:      quotedLabor,
+        quoted_kit:        quotedKit,
         offered_rate:      offered,
+        day_type:          dayType,
         recommended_rate:  Math.round(_hpDayRate),
         session_id:       getSessionId(),
         production_name:  production || null,
