@@ -2351,7 +2351,7 @@ function openHP() {
   document.getElementById('hpRecWrap').style.display = _hpDayRate > 0 ? '' : 'none';
   if (_hpMarket) hpCityChange();
   document.getElementById('hpProdOffer').value = '';
-  document.getElementById('hpQuotedLabor').value = calc.grandTotal > 0 ? Math.round(calc.grandTotal / (v.days || 1)) : '';
+  document.getElementById('hpQuotedLabor').value = '';
   document.getElementById('hpQuotedKit').value = '';
   document.getElementById('hpOfferedRate').value = '0';
   document.getElementById('hpProductionName').value = '';
