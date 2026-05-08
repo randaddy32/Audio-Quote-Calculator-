@@ -825,18 +825,10 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <label>What did they offer?</label>
         <input type="number" id="hpProdOffer" placeholder="e.g. 800" inputmode="decimal">
       </div>
-      <div class="hp-field" style="margin-bottom:4px">
-        <label>What did you quote?</label>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="hp-field" style="margin:0">
-          <label style="font-size:11px;color:var(--muted)">Labor</label>
-          <input type="number" id="hpQuotedLabor" placeholder="e.g. 900" inputmode="decimal">
-        </div>
-        <div class="hp-field" style="margin:0">
-          <label style="font-size:11px;color:var(--muted)">Kit</label>
-          <input type="number" id="hpQuotedKit" placeholder="e.g. 650" inputmode="decimal">
-        </div>
+      <div class="hp-field">
+        <label>What did you quote? <span style="font-size:11px;color:var(--muted)">(per day, all-in)</span></label>
+        <input type="number" id="hpQuotedLabor" placeholder="e.g. 1550" inputmode="decimal">
+        <input type="hidden" id="hpQuotedKit" value="">
       </div>
       <input type="hidden" id="hpOfferedRate" value="0">
       <div class="hp-rec" id="hpRecWrap" style="display:none">
@@ -2086,9 +2078,10 @@ function renderAlerts() {
 
     const rateRows = [
       q.avg_prod_offer ? `<div class="alert-rate-row"><span class="alert-rate-label">Production offered</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_prod_offer.toLocaleString()}/day</span></div>` : '',
-      q.avg_labor      ? `<div class="alert-rate-row"><span class="alert-rate-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
-      q.avg_kit        ? `<div class="alert-rate-row"><span class="alert-rate-label">Kit</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
-      (q.avg_labor && q.avg_kit) ? `<div class="alert-rate-row"><span class="alert-rate-label">Quoted total</span><span class="alert-rate-val" style="color:var(--gold)">$${(q.avg_labor + q.avg_kit).toLocaleString()}/day</span></div>` : '',
+      (q.avg_labor && q.avg_kit)  ? `<div class="alert-rate-row"><span class="alert-rate-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
+      (q.avg_labor && q.avg_kit)  ? `<div class="alert-rate-row"><span class="alert-rate-label">Kit</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
+      (q.avg_labor && q.avg_kit)  ? `<div class="alert-rate-row"><span class="alert-rate-label">Quoted total</span><span class="alert-rate-val" style="color:var(--gold)">$${(q.avg_labor + q.avg_kit).toLocaleString()}/day</span></div>` : '',
+      (q.avg_labor && !q.avg_kit) ? `<div class="alert-rate-row"><span class="alert-rate-label">Your quote (all-in)</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
       (!q.avg_labor && q.avg_offered) ? `<div class="alert-rate-row"><span class="alert-rate-label">Mixer quoted${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--gold)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
       q.avg_rec        ? `<div class="alert-rate-row"><span class="alert-rate-label">Market rate</span><span class="alert-rate-val" style="color:var(--green)">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
     ].join('');
@@ -2132,9 +2125,10 @@ function showTickPopover(el, idx) {
 
   const gap = [
     q.avg_prod_offer ? `<div class="tp-row"><span class="tp-label">Production offered</span><span class="tp-val red">$${q.avg_prod_offer.toLocaleString()}/day</span></div>` : '',
-    q.avg_labor      ? `<div class="tp-row"><span class="tp-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="tp-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
-    q.avg_kit        ? `<div class="tp-row"><span class="tp-label">Kit</span><span class="tp-val" style="color:var(--gold)">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
-    (q.avg_labor && q.avg_kit) ? `<div class="tp-row"><span class="tp-label">Quoted total</span><span class="tp-val" style="color:var(--gold)">$${(q.avg_labor + q.avg_kit).toLocaleString()}/day</span></div>` : '',
+    (q.avg_labor && q.avg_kit)  ? `<div class="tp-row"><span class="tp-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="tp-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
+    (q.avg_labor && q.avg_kit)  ? `<div class="tp-row"><span class="tp-label">Kit</span><span class="tp-val" style="color:var(--gold)">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
+    (q.avg_labor && q.avg_kit)  ? `<div class="tp-row"><span class="tp-label">Quoted total</span><span class="tp-val" style="color:var(--gold)">$${(q.avg_labor + q.avg_kit).toLocaleString()}/day</span></div>` : '',
+    (q.avg_labor && !q.avg_kit) ? `<div class="tp-row"><span class="tp-label">Your quote (all-in)</span><span class="tp-val" style="color:var(--gold)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
     (!q.avg_labor && q.avg_offered) ? `<div class="tp-row"><span class="tp-label">Mixer quoted${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="tp-val" style="color:var(--gold)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
     q.avg_rec        ? `<div class="tp-row"><span class="tp-label">Market rate</span><span class="tp-val green">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
   ].join('');
@@ -2357,7 +2351,7 @@ function openHP() {
   document.getElementById('hpRecWrap').style.display = _hpDayRate > 0 ? '' : 'none';
   if (_hpMarket) hpCityChange();
   document.getElementById('hpProdOffer').value = '';
-  document.getElementById('hpQuotedLabor').value = '';
+  document.getElementById('hpQuotedLabor').value = calc.grandTotal > 0 ? Math.round(calc.grandTotal / (v.days || 1)) : '';
   document.getElementById('hpQuotedKit').value = '';
   document.getElementById('hpOfferedRate').value = '0';
   document.getElementById('hpProductionName').value = '';
