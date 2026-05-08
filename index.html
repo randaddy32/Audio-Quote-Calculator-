@@ -1245,7 +1245,8 @@ function saveRates() {
   flashDot('ratesDot');
 }
 function loadRates() {
-  RATE_KEYS.forEach(k => $(k).value = RATE_DEFS[k]);
+  const saved = JSON.parse(localStorage.getItem('aq_rates') || '{}');
+  RATE_KEYS.forEach(k => $(k).value = saved[k] !== undefined ? saved[k] : RATE_DEFS[k]);
   updateDayRateTotal();
 }
 function updateDayRateTotal() {
@@ -1299,8 +1300,8 @@ function getVals() {
     lavs:        Math.max(0, parseInt($('lavCount').value)   || 0),
     tcBoxes:     0,
     slates:      0,
-    rateLabor:    parseFloat($('rateLabor').value)    || RATE_DEFS.rateLabor,
-    rateKit:      parseFloat($('rateKit').value)      || RATE_DEFS.rateKit,
+    rateLabor:    parseFloat($('rateLabor').value)    || 0,
+    rateKit:      parseFloat($('rateKit').value)      || 0,
     rateRecorder: parseFloat($('rateRecorder').value) || RATE_DEFS.rateRecorder,
     rateWireless: parseFloat($('rateWireless').value) || RATE_DEFS.rateWireless,
     rateHop:      parseFloat($('rateHop').value)      || RATE_DEFS.rateHop,
