@@ -2083,7 +2083,9 @@ function renderAlerts() {
 
     const rateRows = [
       q.avg_prod_offer ? `<div class="alert-rate-row"><span class="alert-rate-label">Production offered</span><span class="alert-rate-val" style="color:var(--muted)">$${q.avg_prod_offer.toLocaleString()}/day</span></div>` : '',
-      q.avg_offered    ? `<div class="alert-rate-row"><span class="alert-rate-label">Mixer quoted</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
+      q.avg_labor      ? `<div class="alert-rate-row"><span class="alert-rate-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
+      q.avg_kit        ? `<div class="alert-rate-row"><span class="alert-rate-label">Kit</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
+      (!q.avg_labor && q.avg_offered) ? `<div class="alert-rate-row"><span class="alert-rate-label">Mixer quoted${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
       q.avg_rec        ? `<div class="alert-rate-row"><span class="alert-rate-label">Market rate</span><span class="alert-rate-val" style="color:var(--green)">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
     ].join('');
 
@@ -2126,7 +2128,9 @@ function showTickPopover(el, idx) {
 
   const gap = [
     q.avg_prod_offer ? `<div class="tp-row"><span class="tp-label">Production offered</span><span class="tp-val" style="color:var(--muted)">$${q.avg_prod_offer.toLocaleString()}/day</span></div>` : '',
-    q.avg_offered    ? `<div class="tp-row"><span class="tp-label">Mixer quoted</span><span class="tp-val red">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
+    q.avg_labor      ? `<div class="tp-row"><span class="tp-label">Labor${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="tp-val red">$${q.avg_labor.toLocaleString()}/day</span></div>` : '',
+    q.avg_kit        ? `<div class="tp-row"><span class="tp-label">Kit</span><span class="tp-val red">$${q.avg_kit.toLocaleString()}/day</span></div>` : '',
+    (!q.avg_labor && q.avg_offered) ? `<div class="tp-row"><span class="tp-label">Mixer quoted${q.day_type ? ` (${q.day_type}hr)` : ''}</span><span class="tp-val red">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
     q.avg_rec        ? `<div class="tp-row"><span class="tp-label">Market rate</span><span class="tp-val green">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
   ].join('');
 
@@ -2230,7 +2234,7 @@ async function fetchHPCount() {
 async function loadTicker() {
   try {
     const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const res = await sbFetch(`hot_potato?select=market,production_offer,offered_rate,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
+    const res = await sbFetch(`hot_potato?select=market,production_offer,quoted_labor,quoted_kit,offered_rate,day_type,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
     const data = res.ok ? await res.json() : [];
 
     let items;
@@ -2239,11 +2243,14 @@ async function loadTicker() {
       for (const row of data) {
         if (!row.market) continue;
         const key = (row.production_name || '') + '|' + row.market;
-        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, prod_offers: [], offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], latest_at: row.created_at };
+        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, prod_offers: [], quoted_labors: [], quoted_kits: [], offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], day_types: [], latest_at: row.created_at };
         byKey[key].count++;
         if (row.created_at > byKey[key].latest_at) byKey[key].latest_at = row.created_at;
         if (row.production_offer) byKey[key].prod_offers.push(row.production_offer);
+        if (row.quoted_labor)     byKey[key].quoted_labors.push(row.quoted_labor);
+        if (row.quoted_kit)       byKey[key].quoted_kits.push(row.quoted_kit);
         if (row.offered_rate)     byKey[key].offered.push(row.offered_rate);
+        if (row.day_type)         byKey[key].day_types.push(row.day_type);
         if (row.recommended_rate) byKey[key].rec.push(row.recommended_rate);
         if (row.cameras)          byKey[key].cameras.push(row.cameras);
         if (row.lavs)             byKey[key].lavs.push(row.lavs);
@@ -2261,7 +2268,10 @@ async function loadTicker() {
           shoot_date:  d.shoot_date,
           count:       d.count,
           latest_at:   d.latest_at,
-          avg_prod_offer: d.prod_offers.length ? Math.round(d.prod_offers.reduce((a, b) => a + b, 0) / d.prod_offers.length) : null,
+          avg_prod_offer:  d.prod_offers.length    ? Math.round(d.prod_offers.reduce((a, b) => a + b, 0)    / d.prod_offers.length)    : null,
+          avg_labor:       d.quoted_labors.length  ? Math.round(d.quoted_labors.reduce((a, b) => a + b, 0)  / d.quoted_labors.length)  : null,
+          avg_kit:         d.quoted_kits.length    ? Math.round(d.quoted_kits.reduce((a, b) => a + b, 0)    / d.quoted_kits.length)    : null,
+          day_type:        d.day_types.length      ? (d.day_types.filter(t => t === '12').length > d.day_types.length / 2 ? '12' : '10') : null,
           avg_offered: d.offered.length ? Math.round(d.offered.reduce((a, b) => a + b, 0) / d.offered.length) : null,
           avg_rec:     d.rec.length     ? Math.round(d.rec.reduce((a, b) => a + b, 0)     / d.rec.length)     : null,
           avg_cameras: d.cameras.length ? Math.round(d.cameras.reduce((a, b) => a + b, 0) / d.cameras.length) : null,
