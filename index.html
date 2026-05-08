@@ -814,6 +814,10 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <input type="date" id="hpShootDate" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:15px;padding:0 12px;height:42px;outline:none;width:100%;box-sizing:border-box;transition:border-color 0.15s" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
       </div>
       <div class="hp-field">
+        <label>Production offer (per day)</label>
+        <input type="number" id="hpProdOffer" placeholder="e.g. 800" inputmode="decimal">
+      </div>
+      <div class="hp-field">
         <label>What did you quote them? (per day)</label>
         <input type="number" id="hpOfferedRate" placeholder="e.g. 1400" inputmode="decimal">
       </div>
@@ -2062,8 +2066,9 @@ function renderAlerts() {
     ].filter(Boolean);
 
     const rateRows = [
-      q.avg_offered ? `<div class="alert-rate-row"><span class="alert-rate-label">Quoted them</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
-      q.avg_rec     ? `<div class="alert-rate-row"><span class="alert-rate-label">Market rate</span><span class="alert-rate-val" style="color:var(--green)">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
+      q.avg_prod_offer ? `<div class="alert-rate-row"><span class="alert-rate-label">Production offered</span><span class="alert-rate-val" style="color:var(--muted)">$${q.avg_prod_offer.toLocaleString()}/day</span></div>` : '',
+      q.avg_offered    ? `<div class="alert-rate-row"><span class="alert-rate-label">Mixer quoted</span><span class="alert-rate-val" style="color:var(--red)">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
+      q.avg_rec        ? `<div class="alert-rate-row"><span class="alert-rate-label">Market rate</span><span class="alert-rate-val" style="color:var(--green)">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
     ].join('');
 
     const dateStr = q.shoot_date ? new Date(q.shoot_date + 'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : null;
@@ -2103,12 +2108,11 @@ function showTickPopover(el, idx) {
     q.crew_type === 'local' ? '🏠 Local crew'       : null,
   ].filter(Boolean);
 
-  const gap = q.avg_offered && q.avg_rec
-    ? `<div class="tp-row"><span class="tp-label">Quoted them</span><span class="tp-val red">$${q.avg_offered.toLocaleString()}/day</span></div>
-       <div class="tp-row"><span class="tp-label">Market rate</span><span class="tp-val green">$${q.avg_rec.toLocaleString()}/day</span></div>`
-    : q.avg_offered
-    ? `<div class="tp-row"><span class="tp-label">Quoted them</span><span class="tp-val red">$${q.avg_offered.toLocaleString()}/day</span></div>`
-    : '';
+  const gap = [
+    q.avg_prod_offer ? `<div class="tp-row"><span class="tp-label">Production offered</span><span class="tp-val" style="color:var(--muted)">$${q.avg_prod_offer.toLocaleString()}/day</span></div>` : '',
+    q.avg_offered    ? `<div class="tp-row"><span class="tp-label">Mixer quoted</span><span class="tp-val red">$${q.avg_offered.toLocaleString()}/day</span></div>` : '',
+    q.avg_rec        ? `<div class="tp-row"><span class="tp-label">Market rate</span><span class="tp-val green">$${q.avg_rec.toLocaleString()}/day</span></div>` : '',
+  ].join('');
 
   const pop = document.getElementById('tickPopover');
   pop.innerHTML = `
@@ -2210,7 +2214,7 @@ async function fetchHPCount() {
 async function loadTicker() {
   try {
     const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const res = await sbFetch(`hot_potato?select=market,offered_rate,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
+    const res = await sbFetch(`hot_potato?select=market,production_offer,offered_rate,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
     const data = res.ok ? await res.json() : [];
 
     let items;
@@ -2219,9 +2223,10 @@ async function loadTicker() {
       for (const row of data) {
         if (!row.market) continue;
         const key = (row.production_name || '') + '|' + row.market;
-        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], latest_at: row.created_at };
+        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, prod_offers: [], offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], latest_at: row.created_at };
         byKey[key].count++;
         if (row.created_at > byKey[key].latest_at) byKey[key].latest_at = row.created_at;
+        if (row.production_offer) byKey[key].prod_offers.push(row.production_offer);
         if (row.offered_rate)     byKey[key].offered.push(row.offered_rate);
         if (row.recommended_rate) byKey[key].rec.push(row.recommended_rate);
         if (row.cameras)          byKey[key].cameras.push(row.cameras);
@@ -2240,6 +2245,7 @@ async function loadTicker() {
           shoot_date:  d.shoot_date,
           count:       d.count,
           latest_at:   d.latest_at,
+          avg_prod_offer: d.prod_offers.length ? Math.round(d.prod_offers.reduce((a, b) => a + b, 0) / d.prod_offers.length) : null,
           avg_offered: d.offered.length ? Math.round(d.offered.reduce((a, b) => a + b, 0) / d.offered.length) : null,
           avg_rec:     d.rec.length     ? Math.round(d.rec.reduce((a, b) => a + b, 0)     / d.rec.length)     : null,
           avg_cameras: d.cameras.length ? Math.round(d.cameras.reduce((a, b) => a + b, 0) / d.cameras.length) : null,
@@ -2319,6 +2325,7 @@ function openHP() {
   document.getElementById('hpRecRate').textContent = '';
   document.getElementById('hpRecWrap').style.display = _hpDayRate > 0 ? '' : 'none';
   if (_hpMarket) hpCityChange();
+  document.getElementById('hpProdOffer').value = '';
   document.getElementById('hpOfferedRate').value = '';
   document.getElementById('hpProductionName').value = '';
   document.getElementById('hpLocation').value = '';
@@ -2381,6 +2388,7 @@ function containsBadWord(str) {
 }
 
 async function submitHP() {
+  const prodOffer = parseInt(document.getElementById('hpProdOffer').value, 10) || null;
   const offered = parseInt(document.getElementById('hpOfferedRate').value, 10);
   const production = document.getElementById('hpProductionName').value.trim();
   const location  = document.getElementById('hpLocation').value.trim();
@@ -2395,9 +2403,10 @@ async function submitHP() {
       method: 'POST',
       headers: { 'Prefer': 'return=minimal' },
       body: JSON.stringify({
-        market:           _hpMarket,
-        offered_rate:     offered,
-        recommended_rate: Math.round(_hpDayRate),
+        market:            _hpMarket,
+        production_offer:  prodOffer,
+        offered_rate:      offered,
+        recommended_rate:  Math.round(_hpDayRate),
         session_id:       getSessionId(),
         production_name:  production || null,
         location:         document.getElementById('hpLocation').value.trim() || null,
