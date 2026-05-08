@@ -845,6 +845,11 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <input type="number" id="hpProdOffer" placeholder="e.g. 800" inputmode="decimal">
       </div>
       <div class="hp-field">
+        <label>What did you quote? <span style="font-size:11px;color:var(--muted)">(per day, all-in)</span></label>
+        <input type="number" id="hpQuotedLabor" placeholder="e.g. 1550" inputmode="decimal">
+        <input type="hidden" id="hpQuotedKit" value="">
+      </div>
+      <div class="hp-field">
         <label>Deal type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label>
         <select id="hpDealType">
           <option value="">— Select deal type —</option>
@@ -854,11 +859,6 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
           <option value="Volunteer">Volunteer</option>
           <option value="Backend">Backend</option>
         </select>
-      </div>
-      <div class="hp-field">
-        <label>What did you quote? <span style="font-size:11px;color:var(--muted)">(per day, all-in)</span></label>
-        <input type="number" id="hpQuotedLabor" placeholder="e.g. 1550" inputmode="decimal">
-        <input type="hidden" id="hpQuotedKit" value="">
       </div>
       <input type="hidden" id="hpOfferedRate" value="0">
       <div class="hp-rec" id="hpRecWrap" style="display:none">
@@ -2128,14 +2128,17 @@ function renderAlerts() {
           <div style="flex:1;min-width:0">
             <div class="alert-prod">${q.production || 'Unnamed Production'}</div>
             <div class="alert-market">${q.market}</div>
-            ${q.location ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(q.location)}</div>` : ''}
-            ${dateStr    ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${dateStr}</div>` : ''}
+            ${q.location     ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(q.location)}</div>` : ''}
+            ${dateStr        ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📅 ${dateStr}</div>` : ''}
+            ${q.project_type ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">🎞️ ${esc(q.project_type)}</div>` : ''}
+            ${q.deal_type    ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">🤝 ${esc(q.deal_type)}</div>` : ''}
           </div>
           <div class="alert-badge" style="align-self:flex-start">🚩 ${q.count}× flagged</div>
         </div>
         <div class="alert-card-body">
           ${rateRows}
           ${chips.length ? `<div class="alert-chips">${chips.map(c => `<span class="alert-chip">${c}</span>`).join('')}</div>` : ''}
+          ${q.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">📝 ${esc(q.notes)}</div>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -2268,7 +2271,7 @@ async function fetchHPCount() {
 async function loadTicker() {
   try {
     const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const res = await sbFetch(`hot_potato?select=market,production_offer,quoted_labor,quoted_kit,offered_rate,day_type,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
+    const res = await sbFetch(`hot_potato?select=market,production_offer,quoted_labor,quoted_kit,offered_rate,day_type,recommended_rate,production_name,location,shoot_date,cameras,lavs,ifbs,boom_op,a2,crew_type,project_type,deal_type,notes,created_at&created_at=gte.${cutoff}&order=created_at.desc&limit=200`);
     const data = res.ok ? await res.json() : [];
 
     let items;
@@ -2277,7 +2280,7 @@ async function loadTicker() {
       for (const row of data) {
         if (!row.market) continue;
         const key = (row.production_name || '') + '|' + row.market;
-        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, prod_offers: [], quoted_labors: [], quoted_kits: [], offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], day_types: [], latest_at: row.created_at };
+        if (!byKey[key]) byKey[key] = { market: row.market, production: row.production_name || null, location: row.location || null, shoot_date: row.shoot_date || null, count: 0, prod_offers: [], quoted_labors: [], quoted_kits: [], offered: [], rec: [], cameras: [], lavs: [], ifbs: [], boom_op: false, a2: false, crew_types: [], day_types: [], project_types: [], deal_types: [], notes_list: [], latest_at: row.created_at };
         byKey[key].count++;
         if (row.created_at > byKey[key].latest_at) byKey[key].latest_at = row.created_at;
         if (row.production_offer) byKey[key].prod_offers.push(row.production_offer);
@@ -2292,6 +2295,9 @@ async function loadTicker() {
         if (row.boom_op)          byKey[key].boom_op = true;
         if (row.a2)               byKey[key].a2 = true;
         if (row.crew_type)        byKey[key].crew_types.push(row.crew_type);
+        if (row.project_type)     byKey[key].project_types.push(row.project_type);
+        if (row.deal_type)        byKey[key].deal_types.push(row.deal_type);
+        if (row.notes)            byKey[key].notes_list.push(row.notes);
       }
       items = Object.values(byKey)
         .sort((a, b) => b.latest_at > a.latest_at ? 1 : -1)
@@ -2313,7 +2319,10 @@ async function loadTicker() {
           avg_ifbs:    d.ifbs.length    ? Math.round(d.ifbs.reduce((a, b) => a + b, 0)    / d.ifbs.length)    : null,
           boom_op:     d.boom_op,
           a2:          d.a2,
-          crew_type:   d.crew_types.length ? (d.crew_types.filter(t => t === 'oot').length > d.crew_types.length / 2 ? 'oot' : 'local') : null,
+          crew_type:    d.crew_types.length    ? (d.crew_types.filter(t => t === 'oot').length > d.crew_types.length / 2 ? 'oot' : 'local') : null,
+          project_type: d.project_types.length ? d.project_types[0] : null,
+          deal_type:    d.deal_types.length    ? d.deal_types[0] : null,
+          notes:        d.notes_list.length    ? d.notes_list[d.notes_list.length - 1] : null,
         }));
     } else {
       const inner = document.getElementById('tickerInner');
