@@ -822,16 +822,19 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
       <input type="hidden" id="hpDayType" value="">
 
       <div class="hp-field">
-        <label>Production offer</label>
+        <label>What did they offer?</label>
         <input type="number" id="hpProdOffer" placeholder="e.g. 800" inputmode="decimal">
+      </div>
+      <div class="hp-field" style="margin-bottom:4px">
+        <label>What did you quote?</label>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="hp-field" style="margin:0">
-          <label>Labor rate</label>
+          <label style="font-size:11px;color:var(--muted)">Labor</label>
           <input type="number" id="hpQuotedLabor" placeholder="e.g. 900" inputmode="decimal">
         </div>
         <div class="hp-field" style="margin:0">
-          <label>Kit rate</label>
+          <label style="font-size:11px;color:var(--muted)">Kit</label>
           <input type="number" id="hpQuotedKit" placeholder="e.g. 650" inputmode="decimal">
         </div>
       </div>
