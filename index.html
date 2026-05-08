@@ -814,6 +814,13 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <label>Shoot date <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label>
         <input type="date" id="hpShootDate">
       </div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:8px">Day Type</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div id="dayType10Btn" class="hp-toggle-btn" onclick="setDayType('10')">⏱ 10hr Day</div>
+        <div id="dayType12Btn" class="hp-toggle-btn" onclick="setDayType('12')">⏱ 12hr Day</div>
+      </div>
+      <input type="hidden" id="hpDayType" value="">
+
       <div class="hp-field">
         <label>Production offer</label>
         <input type="number" id="hpProdOffer" placeholder="e.g. 800" inputmode="decimal">
@@ -2341,6 +2348,7 @@ function openHP() {
   document.getElementById('hpBoomOpBtn').classList.remove('active');
   document.getElementById('hpA2Btn').classList.remove('active');
   document.getElementById('hpCrewLocal').value = '';
+  setDayType('');
   setCrewType(null);
   document.getElementById('hpForm').style.display = '';
   document.getElementById('hpConfirm').style.display = 'none';
@@ -2354,6 +2362,12 @@ function toggleHP(hiddenId, btnId) {
   const on = input.value === '1';
   input.value = on ? '0' : '1';
   btn.classList.toggle('active', !on);
+}
+
+function setDayType(type) {
+  document.getElementById('hpDayType').value = type || '';
+  document.getElementById('dayType10Btn').classList.toggle('active', type === '10');
+  document.getElementById('dayType12Btn').classList.toggle('active', type === '12');
 }
 
 let _crewType = null;
