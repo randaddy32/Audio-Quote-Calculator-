@@ -806,6 +806,7 @@ footer { grid-area: foot; position: sticky; bottom: 0; z-index: 100; background:
         <select id="hpCity" onchange="hpCityChange()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:14px;padding:8px 10px;outline:none;width:100%;transition:border-color 0.15s">
           <option value="">— Select your city —</option>
         </select>
+        <input type="text" id="hpCityCustom" placeholder="Type your city, e.g. Portland, OR" style="display:none;margin-top:6px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:14px;padding:8px 10px;outline:none;width:100%;box-sizing:border-box" oninput="hpCityCustomChange()">
       </div>
       <div class="hp-field">
         <label>Production name</label>
@@ -2403,6 +2404,9 @@ function openHP() {
       o.value = m.name; o.textContent = m.name;
       citySelect.appendChild(o);
     });
+    const other = document.createElement('option');
+    other.value = 'other'; other.textContent = '— Other: type my city —';
+    citySelect.appendChild(other);
   }
   if (_hpMarket) {
     citySelect.value = _hpMarket;
@@ -2414,6 +2418,8 @@ function openHP() {
   document.getElementById('hpRecWrap').style.display = _hpDayRate > 0 ? '' : 'none';
   if (_hpMarket) hpCityChange();
   document.getElementById('hpProdOffer').value = '';
+  document.getElementById('hpCityCustom').value = '';
+  document.getElementById('hpCityCustom').style.display = 'none';
   document.getElementById('hpQuotedLabor').value = '';
   document.getElementById('hpQuotedKit').value = '';
   document.getElementById('hpQuotedAddons').value = '';
@@ -2475,6 +2481,10 @@ function updateHPTotal() {
 
 function hpCityChange() {
   const sel = document.getElementById('hpCity');
+  const customInput = document.getElementById('hpCityCustom');
+  const isOther = sel.value === 'other';
+  customInput.style.display = isOther ? 'block' : 'none';
+  if (isOther) { _hpMarket = customInput.value.trim(); customInput.focus(); return; }
   _hpMarket = sel.value;
   const market = MARKETS.find(m => m.name === _hpMarket);
   if (market) {
@@ -2485,6 +2495,11 @@ function hpCityChange() {
     const calcCity = document.getElementById('yourCity');
     if (calcCity) { calcCity.value = market.id; recalc(); }
   }
+}
+
+function hpCityCustomChange() {
+  _hpMarket = document.getElementById('hpCityCustom').value.trim();
+  document.getElementById('hpRecWrap').style.display = 'none';
 }
 
 function closeHP() {
